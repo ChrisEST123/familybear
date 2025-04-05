@@ -1,5 +1,5 @@
-# futuresight
-FutureSight mobile app - self-made Figma prototype into a functioning mobile app
+# familybear
+FamilyBear companion mobile app - self-made Figma prototype into a functioning mobile app that listens to an android smartwatch for heartbeat data and forwards the data to an Arduino board.
 
 # Welcome to your Expo app 👋
 
