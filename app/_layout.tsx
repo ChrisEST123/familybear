@@ -10,6 +10,8 @@ export default function Layout() {
           fontSize: 18,
         },
       }}
-    />
+    >
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+    </Stack>
   );
 }

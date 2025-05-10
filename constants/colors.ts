@@ -21,6 +21,9 @@ export const colors = {
   
     // === Brand Personality ===
     bearBrown: '#A97458',
+
+    // === UI Foundation ===
+    shadow: '#000000',
   
     // === Dark Mode ===
     dark: {
