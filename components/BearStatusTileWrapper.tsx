@@ -2,7 +2,7 @@ import React from 'react';
 import BearStatusTile from './BearStatusTile';
 
 interface BearStatusTileWrapperProps {
-  type: 'connection' | 'battery' | 'vibration';
+  type: 'connection' | 'battery' | 'vibration' | 'heartbeat';
   value: string | number | boolean;
 }
 
@@ -43,6 +43,13 @@ const BearStatusTileWrapper: React.FC<BearStatusTileWrapperProps> = ({ type, val
 		displayValue = isVibrating ? 'On' : 'Off';
 		break;
 
+	case 'heartbeat':
+		iconName = 'heart';
+		label = 'Heartbeat Pattern';
+		iconColor = '#9C27B0';
+		displayValue = String(value);
+		break;
+		  
 	default:
 		label = 'Status';
 		iconName = 'question';

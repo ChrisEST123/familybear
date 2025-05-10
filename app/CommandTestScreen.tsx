@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { View, Button, StyleSheet, Text, Alert } from 'react-native';
 import { ref, set, get } from 'firebase/database';
-import { db } from '../../firebase';
+import { db } from '../firebase';
 import {
   SoundCommand, HeartbeatCommand, TemperatureCommand,
   FSRStatus, GPSStatus, SoundStatus
-} from '../../components/interfaces';
+} from '../components/interfaces';
 
 const CommandTestScreen: React.FC = () => {
   const [fsr, setFsr] = useState<FSRStatus | null>(null);
