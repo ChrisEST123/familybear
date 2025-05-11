@@ -9,7 +9,7 @@ import {
     fetchActiveHeartbeatSetting,
     fetchHeartbeatPresets,
     HeartbeatPreset,
-    saveHeartbeatPreset,
+    activateHeartbeatPreset,
 } from '@/services/firebase/presets';
 
 export const PresetPicker: React.FC = () => {
@@ -50,7 +50,7 @@ export const PresetPicker: React.FC = () => {
             timestamp: Date.now(),
         };
 
-        await saveHeartbeatPreset(payload);
+        await activateHeartbeatPreset(payload);
         Alert.alert('Preset Applied', `Sent '${preset.label}' to the bear.`);
     };
 
@@ -64,7 +64,14 @@ export const PresetPicker: React.FC = () => {
                     onValueChange={(itemValue) => setSelectedId(itemValue)}
                     style={styles.picker}
                 >
-                    <Picker.Item label="Choose a preset..." value={undefined} />
+                    {presets.length === 0 || !selectedId ? (
+                        <Picker.Item
+                            label="Choose a preset..."
+                            value={undefined}
+                            enabled={false}
+                        />
+                    ) : null}
+
                     {presets.map((p) => (
                         <Picker.Item key={p.id} label={p.label} value={p.id} />
                     ))}
