@@ -1,19 +1,28 @@
 import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet } from 'react-native';
 
 import BearStatusTileWrapper from './BearStatusTileWrapper';
 
 import { PrimaryButton } from '@/components/basic/PrimaryButton';
 import { globalStyles } from '@/constants/styles';
+import { fetchActiveHeartbeatSetting } from '@/services/firebase/presets';
 
 const HomeScreen: React.FC = () => {
     const router = useRouter();
 
     const [heartbeatPreset, setHeartbeatPreset] = useState({
-        key: 'preRecorded1',
-        label: 'PreRecorded1',
+        id: 'test-id',
+        label: 'Test',
     });
+
+    useEffect(() => {
+        const load = async () => {
+            const preset = await fetchActiveHeartbeatSetting();
+            if (preset) setHeartbeatPreset(preset);
+        };
+        load();
+    }, []);
 
     const handleWakeupMode = () => {
         console.log('[Action] Wake Up Mode Settings');
@@ -28,14 +37,14 @@ const HomeScreen: React.FC = () => {
                     <BearStatusTileWrapper type="vibration" value={false} />
                     <BearStatusTileWrapper
                         type="heartbeat"
-                        value={heartbeatPreset.label}
+                        value={heartbeatPreset!.label}
                     />
                 </View>
 
                 <PrimaryButton
                     label="Change Heartbeat Setting"
                     onPress={() =>
-                        router.push('/(tabs)/(stacked)/HeartbeatSettings')
+                        router.push('/(tabs)/(stacked)/heartbeatSettings')
                     }
                 />
                 <PrimaryButton
