@@ -1,23 +1,17 @@
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect } from 'expo-router';
 import { ref, set } from 'firebase/database';
-import React, { useState, useLayoutEffect } from 'react';
-import {
-    View,
-    Text,
-    TextInput,
-    ScrollView,
-    StyleSheet,
-    Switch,
-    Alert,
-} from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 
-import BearStatusTileWrapper from './BearStatusTileWrapper';
-
-import { PrimaryButton } from '@/components/basic/PrimaryButton';
+import BearStatusTileWrapper from '@/components/BearStatusTileWrapper';
+import { CustomHeartbeatForm } from '@/components/heartbeat/CustomHeartbeatForm';
+import { HeartbeatModeSelector } from '@/components/heartbeat/HeartbeatModeSelector';
+import { PresetPicker } from '@/components/heartbeat/PresetPicker';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { globalStyles } from '@/constants/styles';
 import { db } from '@/firebase';
+import { validateHeartbeatInput } from '@/utils/validations';
 
 const HeartbeatSettingsScreen: React.FC = () => {
     const [mode, setMode] = useState<'realtime' | 'preset' | 'custom'>();
@@ -32,30 +26,23 @@ const HeartbeatSettingsScreen: React.FC = () => {
         label: 'PreRecorded1',
     });
 
+    useFocusEffect(
+        useCallback(() => {
+            return () => {
+                setMode(undefined);
+            };
+        }, [])
+    );
+
     const handleApplyCustom = () => {
         const bpm = parseInt(customBpm, 10);
         const freq = parseFloat(customFreq);
         const amp = parseFloat(customAmp);
         const durationSec = parseInt(customDuration, 10);
 
-        if (
-            isNaN(bpm) ||
-            bpm < 30 ||
-            bpm > 180 ||
-            isNaN(freq) ||
-            freq < 0.5 ||
-            freq > 100 ||
-            isNaN(amp) ||
-            amp < 0 ||
-            amp > 1 ||
-            isNaN(durationSec) ||
-            durationSec < 1 ||
-            durationSec > 120
-        ) {
-            Alert.alert(
-                'Validation Error',
-                'Please enter safe and valid values for all fields.'
-            );
+        const error = validateHeartbeatInput({ bpm, freq, amp, durationSec });
+        if (error) {
+            Alert.alert('Validation Error', error);
             return;
         }
 
@@ -86,90 +73,24 @@ const HeartbeatSettingsScreen: React.FC = () => {
                     />
                 </View>
 
-                <View style={styles.optionBox}>
-                    <PrimaryButton
-                        label="Use Real-Time Heartbeat"
-                        onPress={() => setMode('realtime')}
-                    />
-                    <PrimaryButton
-                        label="Use a Preset"
-                        onPress={() => setMode('preset')}
-                    />
-                    <PrimaryButton
-                        label="Create Custom Pattern"
-                        onPress={() => setMode('custom')}
-                    />
-                </View>
+                <HeartbeatModeSelector mode={mode} setMode={setMode} />
 
-                {mode === 'preset' && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>Preset Options</Text>
-                        {/* TODO: Add preset dropdown or cards */}
-                        <Text style={styles.placeholder}>
-                            Preset picker goes here
-                        </Text>
-                    </View>
-                )}
+                {mode === 'preset' && <PresetPicker />}
 
                 {mode === 'custom' && (
-                    <View style={styles.section}>
-                        <Text style={styles.sectionTitle}>
-                            Custom Heartbeat Settings
-                        </Text>
-
-                        <Text style={styles.label}>
-                            Target Heart Rate (BPM)
-                        </Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. 80"
-                            keyboardType="numeric"
-                            value={customBpm}
-                            onChangeText={setCustomBpm}
-                        />
-
-                        <Text style={styles.label}>
-                            Vibration Frequency (Hz)
-                        </Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. 1.2"
-                            keyboardType="numeric"
-                            value={customFreq}
-                            onChangeText={setCustomFreq}
-                        />
-
-                        <Text style={styles.label}>Amplitude (0.0 - 1.0)</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. 0.9"
-                            keyboardType="numeric"
-                            value={customAmp}
-                            onChangeText={setCustomAmp}
-                        />
-
-                        <Text style={styles.label}>Duration (seconds)</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="e.g. 60"
-                            keyboardType="numeric"
-                            value={customDuration}
-                            onChangeText={setCustomDuration}
-                        />
-
-                        <View style={styles.switchRow}>
-                            <Text style={styles.label}>Enable Wakeup Mode</Text>
-                            <Switch
-                                value={wakeupMode}
-                                onValueChange={setWakeupMode}
-                            />
-                        </View>
-
-                        <PrimaryButton
-                            label="Apply Custom Heartbeat"
-                            onPress={handleApplyCustom}
-                        />
-                    </View>
+                    <CustomHeartbeatForm
+                        bpm={customBpm}
+                        setBpm={setCustomBpm}
+                        freq={customFreq}
+                        setFreq={setCustomFreq}
+                        amp={customAmp}
+                        setAmp={setCustomAmp}
+                        duration={customDuration}
+                        setDuration={setCustomDuration}
+                        wakeupMode={wakeupMode}
+                        setWakeupMode={setWakeupMode}
+                        onApply={handleApplyCustom}
+                    />
                 )}
             </ScrollView>
         </View>
