@@ -1,19 +1,23 @@
 import { View } from 'react-native';
 
 import { heartbeatStyles as styles } from './styles';
-
-import PrimaryButton from '@/components/basic/PrimaryButton';
+import PrimaryButton from '../basic/PrimaryButton';
 
 interface Props {
     mode: 'realtime' | 'preset' | 'custom' | undefined;
     setMode: (m: 'realtime' | 'preset' | 'custom') => void;
+    onUseRealTime: () => void;
 }
 
-export const HeartbeatModeSelector: React.FC<Props> = ({ mode, setMode }) => (
+export const HeartbeatModeSelector: React.FC<Props> = ({
+    mode,
+    setMode,
+    onUseRealTime,
+}) => (
     <View style={styles.optionBox}>
         <PrimaryButton
             label="Use Real-Time Heartbeat"
-            onPress={() => setMode('realtime')}
+            onPress={onUseRealTime}
         />
         <PrimaryButton label="Use a Preset" onPress={() => setMode('preset')} />
         <PrimaryButton
