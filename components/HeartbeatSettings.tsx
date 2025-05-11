@@ -31,6 +31,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
         label: 'Test',
     });
     const [presetLabel, setPresetLabel] = useState('');
+    const [prevMode, setPrevMode] = useState<typeof mode>();
 
     useFocusEffect(
         useCallback(() => {
@@ -73,6 +74,17 @@ const HeartbeatSettingsScreen: React.FC = () => {
             loadLiveData();
         }
     }, [mode]);
+
+    useEffect(() => {
+        if (mode === 'custom' && prevMode === 'realtime') {
+            resetCustomFormFields();
+        }
+    }, [mode, prevMode]);
+
+    const handleModeChange = (newMode: typeof mode) => {
+        setPrevMode(mode);
+        setMode(newMode);
+    };
 
     const handleApplyCustom = async () => {
         const bpm = parseInt(customBpm, 10);
@@ -152,8 +164,8 @@ const HeartbeatSettingsScreen: React.FC = () => {
 
                 <HeartbeatModeSelector
                     mode={mode}
-                    setMode={setMode}
-                    onUseRealTime={handleUseLiveHeartRate}
+                    setMode={handleModeChange}
+                    onUseRealTime={() => handleModeChange('realtime')}
                 />
 
                 {mode === 'realtime' && (
