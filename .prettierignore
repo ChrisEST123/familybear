@@ -1,3 +1,5 @@
+.eslintrc.js
+
 # Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
 
 # dependencies
@@ -32,10 +34,9 @@ yarn-error.*
 
 # local env files
 .env*.local
-.vscode
 
 # typescript
 *.tsbuildinfo
 
-app-example-1
-app-example
+app-example-1/
+app-example/

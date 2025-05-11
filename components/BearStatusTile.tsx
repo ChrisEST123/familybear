@@ -9,21 +9,25 @@ interface BearStatusTileProps {
     iconColor?: string;
 }
 
-
 const BearStatusTile: React.FC<BearStatusTileProps> = ({
     iconName,
     label,
     value,
     iconColor = '#333',
-  }) => {
+}) => {
     return (
-      <View style={styles.tile}>
-        <FontAwesome5 name={iconName} size={28} color={iconColor} style={styles.icon} />
-        <Text style={styles.label}>{label}</Text>
-        <Text style={styles.value}>{value}</Text>
-      </View>
+        <View style={styles.tile}>
+            <FontAwesome5
+                name={iconName}
+                size={28}
+                color={iconColor}
+                style={styles.icon}
+            />
+            <Text style={styles.label}>{label}</Text>
+            <Text style={styles.value}>{value}</Text>
+        </View>
     );
-  };
+};
 
 export default BearStatusTile;
 
@@ -41,7 +45,7 @@ const styles = StyleSheet.create({
         shadowColor: '#000',
         shadowOpacity: 0.05,
         shadowRadius: 5,
-    },      
+    },
     icon: {
         fontSize: 28,
         marginBottom: 8,
@@ -53,5 +57,5 @@ const styles = StyleSheet.create({
     },
     value: {
         fontSize: 16,
-    }
+    },
 });
