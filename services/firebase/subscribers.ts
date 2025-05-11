@@ -19,3 +19,15 @@ export const subscribeToActiveHeartbeatSetting = (
 
     return () => unsubscribe(); // For cleanup
 };
+
+export const subscribeToVibrationStatus = (
+    callback: (vibration: boolean) => void
+): Unsubscribe => {
+    const vibrationRef = ref(db, '/status/bear/vibration');
+
+    const unsubscribe = onValue(vibrationRef, (snapshot) => {
+        callback(!!snapshot.val());
+    });
+
+    return () => unsubscribe();
+};
