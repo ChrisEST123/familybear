@@ -8,7 +8,6 @@ export interface HeartbeatPreset {
     beatsPerMinute: number;
     vibrationFrequencyHz: number;
     amplitude: number;
-    durationMs: number;
     wakeupMode: boolean;
 }
 

@@ -1,3 +1,4 @@
+import { format } from 'date-fns/format';
 import { useFocusEffect } from 'expo-router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
@@ -15,6 +16,7 @@ import {
     saveCustomHeartbeatPreset,
 } from '@/services/firebase/presets';
 import { subscribeToActiveHeartbeatSetting } from '@/services/firebase/subscribers';
+import { readCurrentHeartRate } from '@/services/heartRate/liveHeartRateService';
 import { validateHeartbeatInput } from '@/utils/validations';
 
 const HeartbeatSettingsScreen: React.FC = () => {
@@ -23,13 +25,13 @@ const HeartbeatSettingsScreen: React.FC = () => {
     const [customBpm, setCustomBpm] = useState('');
     const [customFreq, setCustomFreq] = useState('');
     const [customAmp, setCustomAmp] = useState('');
-    const [customDuration, setCustomDuration] = useState('');
     const [wakeupMode, setWakeupMode] = useState(false);
     const [heartbeatPreset, setHeartbeatPreset] = useState({
         id: 'test-id',
         label: 'Test',
     });
     const [presetLabel, setPresetLabel] = useState('');
+    const [prevMode, setPrevMode] = useState<typeof mode>();
 
     useFocusEffect(
         useCallback(() => {
@@ -47,13 +49,49 @@ const HeartbeatSettingsScreen: React.FC = () => {
         return () => unsubscribe(); // clean up listener
     }, []);
 
+    useEffect(() => {
+        if (mode === 'realtime') {
+            const loadLiveData = async () => {
+                try {
+                    const bpm = await readCurrentHeartRate();
+                    const now = new Date();
+
+                    const time = format(now, 'HH:mm');
+                    const date = format(now, 'MMM d, yyyy');
+                    const label = `Realtime Capture @ ${time} • ${date}`;
+
+                    setCustomBpm(String(bpm));
+                    setCustomFreq((bpm / 60).toFixed(2));
+                    setCustomAmp('0.6');
+                    setPresetLabel(label);
+                } catch (err) {
+                    console.error('Failed to load live heart rate:', err);
+                    Alert.alert('Error', 'Could not retrieve live heart rate.');
+                    setMode(undefined);
+                }
+            };
+
+            loadLiveData();
+        }
+    }, [mode]);
+
+    useEffect(() => {
+        if (mode === 'custom' && prevMode === 'realtime') {
+            resetCustomFormFields();
+        }
+    }, [mode, prevMode]);
+
+    const handleModeChange = (newMode: typeof mode) => {
+        setPrevMode(mode);
+        setMode(newMode);
+    };
+
     const handleApplyCustom = async () => {
         const bpm = parseInt(customBpm, 10);
         const freq = parseFloat(customFreq);
         const amp = parseFloat(customAmp);
-        const durationSec = parseInt(customDuration, 10);
 
-        const error = validateHeartbeatInput({ bpm, freq, amp, durationSec });
+        const error = validateHeartbeatInput({ bpm, freq, amp });
         if (error) {
             Alert.alert('Validation Error', error);
             return;
@@ -72,7 +110,6 @@ const HeartbeatSettingsScreen: React.FC = () => {
             beatsPerMinute: bpm,
             vibrationFrequencyHz: freq,
             amplitude: amp,
-            durationMs: durationSec * 1000,
             wakeupMode,
             label: presetLabel.trim(),
             timestamp: Date.now(),
@@ -99,11 +136,14 @@ const HeartbeatSettingsScreen: React.FC = () => {
         }
     };
 
+    const handleUseLiveHeartRate = () => {
+        setMode('realtime');
+    };
+
     const resetCustomFormFields = () => {
         setCustomBpm('');
         setCustomFreq('');
         setCustomAmp('');
-        setCustomDuration('');
         setWakeupMode(false);
         setPresetLabel('');
     };
@@ -122,7 +162,31 @@ const HeartbeatSettingsScreen: React.FC = () => {
                     />
                 </View>
 
-                <HeartbeatModeSelector mode={mode} setMode={setMode} />
+                <HeartbeatModeSelector
+                    mode={mode}
+                    setMode={handleModeChange}
+                    onUseRealTime={() => handleModeChange('realtime')}
+                />
+
+                {mode === 'realtime' && (
+                    <CustomHeartbeatForm
+                        bpm={customBpm}
+                        setBpm={setCustomBpm}
+                        freq={customFreq}
+                        setFreq={setCustomFreq}
+                        amp={customAmp}
+                        setAmp={setCustomAmp}
+                        wakeupMode={wakeupMode}
+                        setWakeupMode={setWakeupMode}
+                        onApply={handleApplyCustom}
+                        presetLabel={presetLabel}
+                        setPresetLabel={setPresetLabel}
+                        editableBpm={false}
+                        editableFreq={false}
+                        showWakeup={false}
+                        isLive
+                    />
+                )}
 
                 {mode === 'preset' && <PresetPicker />}
 
@@ -134,13 +198,14 @@ const HeartbeatSettingsScreen: React.FC = () => {
                         setFreq={setCustomFreq}
                         amp={customAmp}
                         setAmp={setCustomAmp}
-                        duration={customDuration}
-                        setDuration={setCustomDuration}
                         wakeupMode={wakeupMode}
                         setWakeupMode={setWakeupMode}
                         onApply={handleApplyCustom}
                         presetLabel={presetLabel}
                         setPresetLabel={setPresetLabel}
+                        showWakeup
+                        editableBpm
+                        editableFreq
                     />
                 )}
             </ScrollView>
