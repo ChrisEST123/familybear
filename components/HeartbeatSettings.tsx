@@ -1,6 +1,6 @@
 import { useFocusEffect } from 'expo-router';
 import { ref, set } from 'firebase/database';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 
 import BearStatusTileWrapper from '@/components/BearStatusTileWrapper';
@@ -11,6 +11,7 @@ import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { globalStyles } from '@/constants/styles';
 import { db } from '@/firebase';
+import { fetchActiveHeartbeatSetting } from '@/services/firebase/presets';
 import { validateHeartbeatInput } from '@/utils/validations';
 
 const HeartbeatSettingsScreen: React.FC = () => {
@@ -21,9 +22,9 @@ const HeartbeatSettingsScreen: React.FC = () => {
     const [customAmp, setCustomAmp] = useState('');
     const [customDuration, setCustomDuration] = useState('');
     const [wakeupMode, setWakeupMode] = useState(false);
-    const [activePreset, setActivePreset] = useState({
-        key: 'activePreset',
-        label: 'PreRecorded1',
+    const [heartbeatPreset, setHeartbeatPreset] = useState({
+        id: 'test-id',
+        label: 'Test',
     });
 
     useFocusEffect(
@@ -33,6 +34,14 @@ const HeartbeatSettingsScreen: React.FC = () => {
             };
         }, [])
     );
+
+    useEffect(() => {
+        const load = async () => {
+            const preset = await fetchActiveHeartbeatSetting();
+            if (preset) setHeartbeatPreset(preset);
+        };
+        load();
+    }, []);
 
     const handleApplyCustom = () => {
         const bpm = parseInt(customBpm, 10);
@@ -65,7 +74,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
                 <View style={styles.statusGrid}>
                     <BearStatusTileWrapper
                         type="heartbeat"
-                        value={activePreset.label}
+                        value={heartbeatPreset!.label}
                     />
                     <BearStatusTileWrapper
                         type="wakeupMode"

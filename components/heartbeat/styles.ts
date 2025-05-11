@@ -41,4 +41,15 @@ export const heartbeatStyles = StyleSheet.create({
         marginTop: spacing.lg,
         marginBottom: spacing.md,
     },
+    pickerWrapper: {
+        backgroundColor: colors.surface,
+        borderRadius: 10,
+        marginBottom: spacing.md,
+    },
+    picker: {
+        color: colors.textPrimary,
+        fontSize: 16,
+        height: 60,
+        width: '100%',
+    },
 });
