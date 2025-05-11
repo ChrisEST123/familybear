@@ -6,8 +6,10 @@ import BearStatusTileWrapper from './BearStatusTileWrapper';
 
 import { PrimaryButton } from '@/components/basic/PrimaryButton';
 import { globalStyles } from '@/constants/styles';
-import { fetchActiveHeartbeatSetting } from '@/services/firebase/presets';
-import { subscribeToVibrationStatus } from '@/services/firebase/subscribers';
+import {
+    subscribeToActiveHeartbeatSetting,
+    subscribeToVibrationStatus,
+} from '@/services/firebase/subscribers';
 
 const HomeScreen: React.FC = () => {
     const router = useRouter();
@@ -24,11 +26,11 @@ const HomeScreen: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const load = async () => {
-            const preset = await fetchActiveHeartbeatSetting();
+        const unsubscribe = subscribeToActiveHeartbeatSetting((preset) => {
             if (preset) setHeartbeatPreset(preset);
-        };
-        load();
+        });
+
+        return () => unsubscribe(); // clean up listener
     }, []);
 
     const handleWakeupMode = () => {
