@@ -22,10 +22,17 @@ export const fetchHeartbeatPresets = async (): Promise<HeartbeatPreset[]> => {
     }));
 };
 
-export const saveHeartbeatPreset = async (
+export const activateHeartbeatPreset = async (
     preset: Omit<HeartbeatPreset, 'id'>
 ): Promise<void> => {
-    const newRef = push(ref(db, '/commands/heartbeat'));
+    const newRef = ref(db, '/commands/heartbeat');
+    await set(newRef, preset);
+};
+
+export const saveCustomHeartbeatPreset = async (
+    preset: Omit<HeartbeatPreset, 'id'>
+): Promise<void> => {
+    const newRef = push(ref(db, '/presets/heartbeat'));
     await set(newRef, preset);
 };
 

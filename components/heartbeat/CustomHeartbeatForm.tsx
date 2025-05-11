@@ -15,6 +15,8 @@ interface Props {
     wakeupMode: boolean;
     setWakeupMode: (v: boolean) => void;
     onApply: () => void;
+    presetLabel: string;
+    setPresetLabel: (v: string) => void;
 }
 
 export const CustomHeartbeatForm: React.FC<Props> = ({
@@ -29,6 +31,8 @@ export const CustomHeartbeatForm: React.FC<Props> = ({
     wakeupMode,
     setWakeupMode,
     onApply,
+    presetLabel,
+    setPresetLabel,
 }) => (
     <View style={styles.section}>
         <Text style={styles.sectionTitle}>Custom Heartbeat Settings</Text>
@@ -70,11 +74,19 @@ export const CustomHeartbeatForm: React.FC<Props> = ({
             onChangeText={setDuration}
         />
 
+        <Text style={styles.label}>Preset Name</Text>
+        <TextInput
+            style={styles.input}
+            placeholder="e.g. Morning Calm"
+            value={presetLabel}
+            onChangeText={setPresetLabel}
+        />
+
         <View style={styles.switchRow}>
             <Text style={styles.label}>Enable Wakeup Mode</Text>
             <Switch value={wakeupMode} onValueChange={setWakeupMode} />
         </View>
 
-        <PrimaryButton label="Apply Custom Heartbeat" onPress={onApply} />
+        <PrimaryButton label="Activate Custom Heartbeat" onPress={onApply} />
     </View>
 );

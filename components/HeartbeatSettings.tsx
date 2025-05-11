@@ -1,7 +1,7 @@
 import { useFocusEffect } from 'expo-router';
-import { ref, set } from 'firebase/database';
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
+import uuid from 'react-native-uuid';
 
 import BearStatusTileWrapper from '@/components/BearStatusTileWrapper';
 import { CustomHeartbeatForm } from '@/components/heartbeat/CustomHeartbeatForm';
@@ -10,8 +10,11 @@ import { PresetPicker } from '@/components/heartbeat/PresetPicker';
 import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 import { globalStyles } from '@/constants/styles';
-import { db } from '@/firebase';
-import { fetchActiveHeartbeatSetting } from '@/services/firebase/presets';
+import {
+    activateHeartbeatPreset,
+    saveCustomHeartbeatPreset,
+} from '@/services/firebase/presets';
+import { subscribeToActiveHeartbeatSetting } from '@/services/firebase/subscribers';
 import { validateHeartbeatInput } from '@/utils/validations';
 
 const HeartbeatSettingsScreen: React.FC = () => {
@@ -26,6 +29,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
         id: 'test-id',
         label: 'Test',
     });
+    const [presetLabel, setPresetLabel] = useState('');
 
     useFocusEffect(
         useCallback(() => {
@@ -36,14 +40,14 @@ const HeartbeatSettingsScreen: React.FC = () => {
     );
 
     useEffect(() => {
-        const load = async () => {
-            const preset = await fetchActiveHeartbeatSetting();
+        const unsubscribe = subscribeToActiveHeartbeatSetting((preset) => {
             if (preset) setHeartbeatPreset(preset);
-        };
-        load();
+        });
+
+        return () => unsubscribe(); // clean up listener
     }, []);
 
-    const handleApplyCustom = () => {
+    const handleApplyCustom = async () => {
         const bpm = parseInt(customBpm, 10);
         const freq = parseFloat(customFreq);
         const amp = parseFloat(customAmp);
@@ -55,17 +59,53 @@ const HeartbeatSettingsScreen: React.FC = () => {
             return;
         }
 
+        if (!presetLabel.trim()) {
+            Alert.alert(
+                'Missing Label',
+                'Please enter a name for your custom preset.'
+            );
+            return;
+        }
+
         const payload = {
+            id: uuid.v4(),
             beatsPerMinute: bpm,
             vibrationFrequencyHz: freq,
             amplitude: amp,
             durationMs: durationSec * 1000,
             wakeupMode,
+            label: presetLabel.trim(),
             timestamp: Date.now(),
         };
 
-        console.log('Sending to Firebase:', payload);
-        set(ref(db, '/commands/heartbeat'), payload);
+        try {
+            // Send command to apply
+            await activateHeartbeatPreset(payload);
+
+            // Also save to presets
+            await saveCustomHeartbeatPreset(payload);
+
+            Alert.alert(
+                'Custom Heartbeat Applied',
+                'Your preset has been saved and applied.'
+            );
+            resetCustomFormFields();
+        } catch (err) {
+            console.error('Error applying custom heartbeat:', err);
+            Alert.alert(
+                'Error',
+                'Something went wrong while applying the heartbeat.'
+            );
+        }
+    };
+
+    const resetCustomFormFields = () => {
+        setCustomBpm('');
+        setCustomFreq('');
+        setCustomAmp('');
+        setCustomDuration('');
+        setWakeupMode(false);
+        setPresetLabel('');
     };
 
     return (
@@ -99,6 +139,8 @@ const HeartbeatSettingsScreen: React.FC = () => {
                         wakeupMode={wakeupMode}
                         setWakeupMode={setWakeupMode}
                         onApply={handleApplyCustom}
+                        presetLabel={presetLabel}
+                        setPresetLabel={setPresetLabel}
                     />
                 )}
             </ScrollView>
