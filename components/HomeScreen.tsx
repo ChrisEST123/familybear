@@ -7,6 +7,7 @@ import BearStatusTileWrapper from './BearStatusTileWrapper';
 import { PrimaryButton } from '@/components/basic/PrimaryButton';
 import { globalStyles } from '@/constants/styles';
 import { fetchActiveHeartbeatSetting } from '@/services/firebase/presets';
+import { subscribeToVibrationStatus } from '@/services/firebase/subscribers';
 
 const HomeScreen: React.FC = () => {
     const router = useRouter();
@@ -15,6 +16,12 @@ const HomeScreen: React.FC = () => {
         id: 'test-id',
         label: 'Test',
     });
+    const [vibration, setVibration] = useState(false);
+
+    useEffect(() => {
+        const unsubscribe = subscribeToVibrationStatus(setVibration);
+        return () => unsubscribe();
+    }, []);
 
     useEffect(() => {
         const load = async () => {
@@ -34,7 +41,7 @@ const HomeScreen: React.FC = () => {
                 <View style={styles.statusGrid}>
                     <BearStatusTileWrapper type="connection" value />
                     <BearStatusTileWrapper type="battery" value={82} />
-                    <BearStatusTileWrapper type="vibration" value={false} />
+                    <BearStatusTileWrapper type="vibration" value={vibration} />
                     <BearStatusTileWrapper
                         type="heartbeat"
                         value={heartbeatPreset!.label}
