@@ -31,3 +31,19 @@ export const subscribeToVibrationStatus = (
 
     return () => unsubscribe();
 };
+
+export const subscribeToFsrStatus = (
+    callback: (fsrValue: boolean) => void
+): Unsubscribe => {
+    const fsrRef = ref(db, '/status/bear/fsr');
+
+    const unsubscribe = onValue(fsrRef, (snapshot) => {
+        if (!snapshot.exists()) {
+            callback(false);
+        } else {
+            callback(!!snapshot.val());
+        }
+    });
+
+    return () => unsubscribe();
+};
