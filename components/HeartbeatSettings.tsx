@@ -136,10 +136,6 @@ const HeartbeatSettingsScreen: React.FC = () => {
         }
     };
 
-    const handleUseLiveHeartRate = () => {
-        setMode('realtime');
-    };
-
     const resetCustomFormFields = () => {
         setCustomBpm('');
         setCustomFreq('');
