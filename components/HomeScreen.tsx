@@ -8,6 +8,7 @@ import { PrimaryButton } from '@/components/basic/PrimaryButton';
 import { globalStyles } from '@/constants/styles';
 import {
     subscribeToActiveHeartbeatSetting,
+    subscribeToConnectionStatus,
     subscribeToVibrationStatus,
 } from '@/services/firebase/subscribers';
 
@@ -19,9 +20,15 @@ const HomeScreen: React.FC = () => {
         label: 'Test',
     });
     const [vibration, setVibration] = useState(false);
+    const [connection, setConnection] = useState(false);
 
     useEffect(() => {
         const unsubscribe = subscribeToVibrationStatus(setVibration);
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        const unsubscribe = subscribeToConnectionStatus(setConnection);
         return () => unsubscribe();
     }, []);
 
@@ -37,7 +44,10 @@ const HomeScreen: React.FC = () => {
         <View style={globalStyles.root}>
             <ScrollView contentContainerStyle={globalStyles.container}>
                 <View style={styles.statusGrid}>
-                    <BearStatusTileWrapper type="connection" value />
+                    <BearStatusTileWrapper
+                        type="connection"
+                        value={connection}
+                    />
                     <BearStatusTileWrapper type="battery" value={82} />
                     <BearStatusTileWrapper type="vibration" value={vibration} />
                     <BearStatusTileWrapper
