@@ -1,7 +1,7 @@
 import React, { useEffect, ReactNode, useRef } from 'react';
 
 import { subscribeToFsrStatus } from '@/services/firebase/subscribers';
-import { loadWatchNotificationImageUrl } from '@/services/firebase/watchImageUpload';
+import { loadWatchNotificationImage } from '@/services/firebase/watchImageUpload';
 import { sendWatchNotification } from '@/services/watch/sendNotification';
 
 interface Props {
@@ -16,15 +16,13 @@ export const BearPickupListenerProvider: React.FC<Props> = ({ children }) => {
             if (value && !triggeredRef.current) {
                 triggeredRef.current = true;
 
-                const imageUrl = await loadWatchNotificationImageUrl();
+                const imageUri = await loadWatchNotificationImage();
 
                 await sendWatchNotification({
                     title: 'Bear Alert!',
                     message: 'Your bear is calling.',
-                    imageUrl: imageUrl ?? undefined,
+                    imageUri: imageUri ?? undefined,
                 });
-
-                console.log('[FSR] Triggered with image:', imageUrl);
             }
 
             if (!value) {
