@@ -4,6 +4,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, ScrollView, StyleSheet, Alert } from 'react-native';
 import uuid from 'react-native-uuid';
 
+import { WakeupScheduler } from './heartbeat/WakeupScheduler';
+
 import BearStatusTileWrapper from '@/components/BearStatusTileWrapper';
 import { CustomHeartbeatForm } from '@/components/heartbeat/CustomHeartbeatForm';
 import { HeartbeatModeSelector } from '@/components/heartbeat/HeartbeatModeSelector';
@@ -15,23 +17,33 @@ import {
     activateHeartbeatPreset,
     saveCustomHeartbeatPreset,
 } from '@/services/firebase/presets';
-import { subscribeToActiveHeartbeatSetting } from '@/services/firebase/subscribers';
+import {
+    subscribeToActiveHeartbeatSetting,
+    subscribeToWakeupModeStatus,
+} from '@/services/firebase/subscribers';
 import { readCurrentHeartRate } from '@/services/heartRate/liveHeartRateService';
 import { validateHeartbeatInput } from '@/utils/validations';
 
 const HeartbeatSettingsScreen: React.FC = () => {
-    const [mode, setMode] = useState<'realtime' | 'preset' | 'custom'>();
+    const [mode, setMode] = useState<
+        'realtime' | 'preset' | 'custom' | 'wakeupmode'
+    >();
 
     const [customBpm, setCustomBpm] = useState('');
     const [customFreq, setCustomFreq] = useState('');
     const [customAmp, setCustomAmp] = useState('');
-    const [wakeupMode, setWakeupMode] = useState(false);
+    const [wakeupModeStatus, setWakeupModeStatus] = useState({
+        enabled: false,
+        time: '',
+    });
     const [heartbeatPreset, setHeartbeatPreset] = useState({
         id: 'test-id',
         label: 'Test',
     });
     const [presetLabel, setPresetLabel] = useState('');
     const [prevMode, setPrevMode] = useState<typeof mode>();
+    const [wakeupScheduleEnabled, setWakeupScheduleEnabled] = useState(false);
+    const [wakeupTime, setWakeupTime] = useState(new Date());
 
     useFocusEffect(
         useCallback(() => {
@@ -48,6 +60,22 @@ const HeartbeatSettingsScreen: React.FC = () => {
 
         return () => unsubscribe(); // clean up listener
     }, []);
+
+    useEffect(() => {
+        const unsubscribe = subscribeToWakeupModeStatus(setWakeupModeStatus);
+        return () => unsubscribe();
+    }, []);
+
+    useEffect(() => {
+        if (wakeupModeStatus.time) {
+            const [hh, mm] = wakeupModeStatus.time.split(':');
+            const date = new Date();
+            date.setHours(parseInt(hh, 10));
+            date.setMinutes(parseInt(mm, 10));
+            setWakeupTime(date);
+        }
+        setWakeupScheduleEnabled(wakeupModeStatus.enabled);
+    }, [wakeupModeStatus]);
 
     useEffect(() => {
         if (mode === 'realtime') {
@@ -110,7 +138,6 @@ const HeartbeatSettingsScreen: React.FC = () => {
             beatsPerMinute: bpm,
             vibrationFrequencyHz: freq,
             amplitude: amp,
-            wakeupMode,
             label: presetLabel.trim(),
             timestamp: Date.now(),
         };
@@ -140,7 +167,6 @@ const HeartbeatSettingsScreen: React.FC = () => {
         setCustomBpm('');
         setCustomFreq('');
         setCustomAmp('');
-        setWakeupMode(false);
         setPresetLabel('');
     };
 
@@ -154,7 +180,11 @@ const HeartbeatSettingsScreen: React.FC = () => {
                     />
                     <BearStatusTileWrapper
                         type="wakeupMode"
-                        value={wakeupMode}
+                        value={
+                            wakeupModeStatus.enabled
+                                ? `Active @ ${wakeupModeStatus.time}`
+                                : 'Inactive'
+                        }
                     />
                 </View>
 
@@ -172,8 +202,6 @@ const HeartbeatSettingsScreen: React.FC = () => {
                         setFreq={setCustomFreq}
                         amp={customAmp}
                         setAmp={setCustomAmp}
-                        wakeupMode={wakeupMode}
-                        setWakeupMode={setWakeupMode}
                         onApply={handleApplyCustom}
                         presetLabel={presetLabel}
                         setPresetLabel={setPresetLabel}
@@ -194,14 +222,21 @@ const HeartbeatSettingsScreen: React.FC = () => {
                         setFreq={setCustomFreq}
                         amp={customAmp}
                         setAmp={setCustomAmp}
-                        wakeupMode={wakeupMode}
-                        setWakeupMode={setWakeupMode}
                         onApply={handleApplyCustom}
                         presetLabel={presetLabel}
                         setPresetLabel={setPresetLabel}
                         showWakeup
                         editableBpm
                         editableFreq
+                    />
+                )}
+
+                {mode === 'wakeupmode' && (
+                    <WakeupScheduler
+                        time={wakeupTime}
+                        setTime={setWakeupTime}
+                        enabled={wakeupScheduleEnabled}
+                        setEnabled={setWakeupScheduleEnabled}
                     />
                 )}
             </ScrollView>

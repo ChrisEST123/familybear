@@ -4,8 +4,8 @@ import { heartbeatStyles as styles } from './styles';
 import PrimaryButton from '../basic/PrimaryButton';
 
 interface Props {
-    mode: 'realtime' | 'preset' | 'custom' | undefined;
-    setMode: (m: 'realtime' | 'preset' | 'custom') => void;
+    mode: 'realtime' | 'preset' | 'custom' | 'wakeupmode' | undefined;
+    setMode: (m: 'realtime' | 'preset' | 'custom' | 'wakeupmode') => void;
     onUseRealTime: () => void;
 }
 
@@ -23,6 +23,10 @@ export const HeartbeatModeSelector: React.FC<Props> = ({
         <PrimaryButton
             label="Create Custom Pattern"
             onPress={() => setMode('custom')}
+        />
+        <PrimaryButton
+            label="Edit Wake Up Mode"
+            onPress={() => setMode('wakeupmode')}
         />
     </View>
 );

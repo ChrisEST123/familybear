@@ -60,9 +60,10 @@ const BearStatusTileWrapper: React.FC<BearStatusTileWrapperProps> = ({
         case 'wakeupMode':
             iconName = 'bell';
             label = 'Wake Up Mode';
-            const isWakeup = value === true || value === 'On';
-            iconColor = isWakeup ? '#FFC107' : '#999';
-            displayValue = isWakeup ? 'Enabled' : 'Disabled';
+
+            const stringVal = String(value);
+            iconColor = stringVal.includes('Active') ? '#FFC107' : '#999';
+            displayValue = stringVal;
             break;
 
         default:

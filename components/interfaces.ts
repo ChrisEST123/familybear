@@ -7,8 +7,6 @@ export interface HeartbeatCommand {
     beatsPerMinute: number;
     vibrationFrequencyHz: number;
     amplitude: number;
-    durationMs: number;
-    wakeupMode: boolean;
     timestamp: number;
 }
 

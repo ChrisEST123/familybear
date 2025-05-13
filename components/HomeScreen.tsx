@@ -33,10 +33,6 @@ const HomeScreen: React.FC = () => {
         return () => unsubscribe(); // clean up listener
     }, []);
 
-    const handleWakeupMode = () => {
-        console.log('[Action] Wake Up Mode Settings');
-    };
-
     return (
         <View style={globalStyles.root}>
             <ScrollView contentContainerStyle={globalStyles.container}>
@@ -55,10 +51,6 @@ const HomeScreen: React.FC = () => {
                     onPress={() =>
                         router.push('/(tabs)/(stacked)/heartbeatSettings')
                     }
-                />
-                <PrimaryButton
-                    label="Wake Up Mode Settings"
-                    onPress={handleWakeupMode}
                 />
             </ScrollView>
         </View>

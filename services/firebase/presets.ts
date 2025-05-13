@@ -8,7 +8,6 @@ export interface HeartbeatPreset {
     beatsPerMinute: number;
     vibrationFrequencyHz: number;
     amplitude: number;
-    wakeupMode: boolean;
 }
 
 export const fetchHeartbeatPresets = async (): Promise<HeartbeatPreset[]> => {

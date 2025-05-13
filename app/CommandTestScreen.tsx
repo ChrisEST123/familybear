@@ -40,8 +40,6 @@ const CommandTestScreen: React.FC = () => {
             beatsPerMinute: 80,
             vibrationFrequencyHz: 1.2,
             amplitude: 0.9,
-            durationMs: 60000,
-            wakeupMode: false,
             timestamp: Date.now(),
         };
         set(ref(db, '/commands/heartbeat'), heartbeatData);
