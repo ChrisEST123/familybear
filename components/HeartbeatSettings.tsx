@@ -67,6 +67,17 @@ const HeartbeatSettingsScreen: React.FC = () => {
     }, []);
 
     useEffect(() => {
+        if (wakeupModeStatus.time) {
+            const [hh, mm] = wakeupModeStatus.time.split(':');
+            const date = new Date();
+            date.setHours(parseInt(hh, 10));
+            date.setMinutes(parseInt(mm, 10));
+            setWakeupTime(date);
+        }
+        setWakeupScheduleEnabled(wakeupModeStatus.enabled);
+    }, [wakeupModeStatus]);
+
+    useEffect(() => {
         if (mode === 'realtime') {
             const loadLiveData = async () => {
                 try {
