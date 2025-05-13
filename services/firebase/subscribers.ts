@@ -67,3 +67,19 @@ export const subscribeToWakeupModeStatus = (
 
     return () => unsubscribe();
 };
+
+export const subscribeToConnectionStatus = (
+    callback: (connected: boolean) => void
+): Unsubscribe => {
+    const connectionRef = ref(db, '/status/bear/connection');
+
+    const unsubscribe = onValue(connectionRef, (snapshot) => {
+        if (!snapshot.exists()) {
+            callback(false);
+        } else {
+            callback(!!snapshot.val());
+        }
+    });
+
+    return () => unsubscribe();
+};
