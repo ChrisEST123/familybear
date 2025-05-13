@@ -39,3 +39,22 @@ yarn-error.*
 
 app-example-1
 app-example
+
+# Android
+android/
+*.keystore
+*.jks
+*.iml
+.gradle/
+local.properties
+
+# iOS
+ios/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.xccheckout
+*.xcscmblueprint
+
+# VSCode
+.vscode/

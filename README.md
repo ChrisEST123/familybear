@@ -1,54 +1,140 @@
-# familybear
+🧸 FamilyBear Companion App
+===========================
 
-FamilyBear companion mobile app - self-made Figma prototype into a functioning mobile app that listens to an android smartwatch for heartbeat data and forwards the data to an Arduino board.
+**FamilyBear** is a mobile app that helps parents stay emotionally connected to their children through a tactile teddy bear. The app allows sending heartbeats, sounds, and scheduled wake-up modes remotely. It is built using **React Native (Expo)** and connects to a **Firebase Realtime Database**.
 
-# Welcome to your Expo app 👋
+* * *
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+🚀 Features
+-----------
 
-## Get started
+*   Send preset or custom **heartbeat vibrations**
+*   Control **wake-up mode scheduling**
+*   Select and trigger **sound patterns**
+*   Live **vibration status updates**
+*   Firebase integration with real-time sync
 
-1. Install dependencies
+* * *
 
-    ```bash
+📲 Getting Started
+------------------
+
+### 1\. Clone the Repository
+
+    
+    git clone https://github.com/your-org/familybear-app.git
+    cd familybear-app
+    
+
+### 2\. Install Dependencies
+
+    
     npm install
-    ```
+    # or
+    yarn
+    
 
-2. Start the app
+### 3\. Create a .env File
 
-    ```bash
-     npx expo start
-    ```
+Create a file named `.env` in the root directory with the following values:
 
-In the output, you'll find options to open the app in a
+    
+    FIREBASE_API_KEY=your_api_key
+    FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+    FIREBASE_DATABASE_URL=https://your_project.firebaseio.com
+    FIREBASE_PROJECT_ID=your_project
+    FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+    FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+    FIREBASE_APP_ID=your_app_id
+    
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+**Note:** You do not need to configure Firebase manually — the app handles it via `firebase.ts`.
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+### 4\. Start the App
 
-## Get a fresh project
+    
+    npx expo start
+    
 
-When you're ready, run:
+Since this project will be ejected, **you must use a custom development build**. Expo Go is not supported.
 
-```bash
-npm run reset-project
-```
+#### Build a Development Client
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+    
+    npx expo run:android
+    # or
+    npx expo run:ios
+    
+Keep in mind IOS has not been the main focus of development.
 
-## Learn more
+This will install the native dev client and launch the app directly on your device or emulator.
 
-To learn more about developing your project with Expo, look at the following resources:
+* * *
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+📱 Running on Android Emulator
+------------------------------
 
-## Join the community
+### 1\. Install Android Studio
 
-Join our community of developers creating universal apps.
+Download and install from [developer.android.com/studio](https://developer.android.com/studio).
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+### 2\. Set Up the Emulator
+
+*   Launch Android Studio
+*   Go to **Device Manager** → Create Device
+*   Choose a device (e.g. Pixel 6) and system image (e.g. API 33+)
+*   Finish setup and start the emulator
+
+### 3\. Run the App on Emulator
+
+With the emulator running:
+
+    
+    npx expo run:android
+    
+
+This will compile and install the app onto the emulator.
+
+* * *
+
+🧪 Local Testing
+----------------
+
+### Test Live Features
+
+*   Use the heartbeat form to submit BPM and frequency
+*   Pick a sound to send from Bear Settings
+*   Toggle and schedule wake-up mode time
+*   Watch status tiles update based on Firebase data
+
+* * *
+
+🔧 Troubleshooting
+------------------
+
+### ❌ Firebase Not Connecting
+
+**Problem:** Firebase requests fail or silently time out.
+
+**Fix:**
+
+*   Ensure you have internet access on your emulator or device
+*   Restart the emulator
+*   Check your `.env` values
+*   Ensure the correct Firebase Realtime Database URL is used
+
+### ❌ Emulator Cannot Reach Firebase (on localhost)
+
+If you're using a local Firebase emulator or tunneling, run:
+
+    
+    adb reverse tcp:9000 tcp:9000
+    
+
+This allows your Android emulator to access your machine's localhost ports.
+
+### ❌ Firebase Storage Upload Fails
+
+**Problem:** Storage uploads fail due to big file size.
+
+**Fix:** I use base64 image data directly in Realtime Database which has some limitations.
