@@ -8,7 +8,7 @@ import { PrimaryButton } from '@/components/basic/PrimaryButton';
 import { globalStyles } from '@/constants/styles';
 import {
     subscribeToActiveHeartbeatSetting,
-    subscribeToConnectionStatus,
+    subscribeToLastSeen,
     subscribeToVibrationStatus,
 } from '@/services/firebase/subscribers';
 
@@ -20,7 +20,7 @@ const HomeScreen: React.FC = () => {
         label: 'Test',
     });
     const [vibration, setVibration] = useState(false);
-    const [connection, setConnection] = useState(false);
+    const [connected, setConnected] = useState(false);
 
     useEffect(() => {
         const unsubscribe = subscribeToVibrationStatus(setVibration);
@@ -28,8 +28,31 @@ const HomeScreen: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        const unsubscribe = subscribeToConnectionStatus(setConnection);
-        return () => unsubscribe();
+        let timeout: number;
+
+        const unsubscribe = subscribeToLastSeen((lastSeen) => {
+            if (!lastSeen) {
+                setConnected(false);
+                return;
+            }
+
+            const check = () => {
+                const now = Date.now();
+                const lastSeenMs = lastSeen * 1000;
+
+                setConnected(now - lastSeenMs < 10000);
+            };
+
+            check();
+
+            clearInterval(timeout);
+            timeout = setInterval(check, 1000);
+        });
+
+        return () => {
+            unsubscribe();
+            clearInterval(timeout);
+        };
     }, []);
 
     useEffect(() => {
@@ -46,7 +69,7 @@ const HomeScreen: React.FC = () => {
                 <View style={styles.statusGrid}>
                     <BearStatusTileWrapper
                         type="connection"
-                        value={connection}
+                        value={connected}
                     />
                     <BearStatusTileWrapper type="battery" value={82} />
                     <BearStatusTileWrapper type="vibration" value={vibration} />

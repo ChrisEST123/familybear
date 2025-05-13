@@ -68,16 +68,16 @@ export const subscribeToWakeupModeStatus = (
     return () => unsubscribe();
 };
 
-export const subscribeToConnectionStatus = (
-    callback: (connected: boolean) => void
+export const subscribeToLastSeen = (
+    callback: (lastSeen: number | null) => void
 ): Unsubscribe => {
-    const connectionRef = ref(db, '/status/bear/connection');
+    const lastSeenRef = ref(db, '/status/bear/lastSeen');
 
-    const unsubscribe = onValue(connectionRef, (snapshot) => {
+    const unsubscribe = onValue(lastSeenRef, (snapshot) => {
         if (!snapshot.exists()) {
-            callback(false);
+            callback(null);
         } else {
-            callback(!!snapshot.val());
+            callback(Number(snapshot.val()));
         }
     });
 
