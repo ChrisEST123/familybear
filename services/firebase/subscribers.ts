@@ -47,3 +47,23 @@ export const subscribeToFsrStatus = (
 
     return () => unsubscribe();
 };
+
+export const subscribeToWakeupModeStatus = (
+    callback: (data: { enabled: boolean; time: string }) => void
+): Unsubscribe => {
+    const wakeupRef = ref(db, '/commands/wakeupmode');
+    const unsubscribe = onValue(wakeupRef, (snapshot) => {
+        if (!snapshot.exists()) {
+            callback({ enabled: false, time: '' });
+            return;
+        }
+
+        const data = snapshot.val();
+        callback({
+            enabled: !!data.enabled,
+            time: data.time || '',
+        });
+    });
+
+    return () => unsubscribe();
+};

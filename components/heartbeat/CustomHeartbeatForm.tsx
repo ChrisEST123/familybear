@@ -1,6 +1,6 @@
 import { Picker } from '@react-native-picker/picker';
 import React from 'react';
-import { View, Text, TextInput, Switch } from 'react-native';
+import { View, Text, TextInput } from 'react-native';
 
 import { heartbeatStyles as styles } from './styles';
 import PrimaryButton from '../basic/PrimaryButton';
@@ -33,12 +33,9 @@ export const CustomHeartbeatForm: React.FC<Props> = ({
     setAmp,
     presetLabel,
     setPresetLabel,
-    wakeupMode,
-    setWakeupMode,
     onApply,
     editableBpm = true,
     editableFreq = true,
-    showWakeup = true,
     isLive = false,
 }) => (
     <View style={styles.section}>
@@ -86,13 +83,6 @@ export const CustomHeartbeatForm: React.FC<Props> = ({
             value={presetLabel}
             onChangeText={setPresetLabel}
         />
-
-        {showWakeup && wakeupMode !== undefined && setWakeupMode && (
-            <View style={styles.switchRow}>
-                <Text style={styles.label}>Enable Wakeup Mode</Text>
-                <Switch value={wakeupMode} onValueChange={setWakeupMode} />
-            </View>
-        )}
 
         <PrimaryButton
             label={
