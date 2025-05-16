@@ -26,6 +26,14 @@ export default function Layout() {
                     headerBackVisible: true,
                 }}
             />
+
+            <Stack.Screen
+                name="heatSettings"
+                options={{
+                    title: 'Choose heat settings',
+                    headerBackVisible: true,
+                }}
+            />
         </Stack>
     );
 }

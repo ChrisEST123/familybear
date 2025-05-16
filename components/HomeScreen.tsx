@@ -10,6 +10,7 @@ import {
     subscribeToActiveHeartbeatSetting,
     subscribeToBatteryLevel,
     subscribeToBearGpsData,
+    subscribeToBearHeatStatus,
     subscribeToGpsEnabled,
     subscribeToLastSeen,
     subscribeToVibrationStatus,
@@ -29,6 +30,10 @@ const HomeScreen: React.FC = () => {
         'unknown'
     );
     const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
+    const [heatStatus, setHeatStatus] = useState<{
+        temperature: number;
+        active: boolean;
+    } | null>(null);
 
     useEffect(() => {
         const unsubscribe = subscribeToVibrationStatus(setVibration);
@@ -92,6 +97,11 @@ const HomeScreen: React.FC = () => {
         return () => unsubscribe();
     }, []);
 
+    useEffect(() => {
+        const unsubscribe = subscribeToBearHeatStatus(setHeatStatus);
+        return () => unsubscribe();
+    }, []);
+
     return (
         <View style={globalStyles.root}>
             <ScrollView contentContainerStyle={globalStyles.container}>
@@ -114,6 +124,10 @@ const HomeScreen: React.FC = () => {
                         type="geoFence"
                         value={gpsEnabled ? geoFenceStatus : 'unknown'}
                     />
+                    <BearStatusTileWrapper
+                        type="heat"
+                        value={heatStatus?.active ? 'On' : 'Off'}
+                    />
                 </View>
 
                 <PrimaryButton
@@ -126,6 +140,13 @@ const HomeScreen: React.FC = () => {
                 <PrimaryButton
                     label="Bear GPS"
                     onPress={() => router.push('/(tabs)/(stacked)/gps')}
+                />
+
+                <PrimaryButton
+                    label="Bear Heat Settings"
+                    onPress={() =>
+                        router.push('/(tabs)/(stacked)/heatSettings')
+                    }
                 />
             </ScrollView>
         </View>

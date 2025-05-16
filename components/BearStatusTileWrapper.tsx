@@ -10,7 +10,9 @@ interface BearStatusTileWrapperProps {
         | 'heartbeat'
         | 'wakeupMode'
         | 'gps'
-        | 'geoFence';
+        | 'geoFence'
+        | 'heat'
+        | 'temperature';
     value: string | number | boolean;
 }
 
@@ -95,6 +97,23 @@ const BearStatusTileWrapper: React.FC<BearStatusTileWrapperProps> = ({
                 iconColor = '#999';
                 displayValue = 'Unknown';
             }
+            break;
+
+        case 'heat':
+            iconName = 'fire';
+            label = 'Heat Mode';
+            iconColor = value === 'On' ? '#FF5722' : '#999';
+            displayValue = value === 'On' ? 'On' : 'Off';
+            break;
+
+        case 'temperature':
+            iconName = 'thermometer-half';
+            label = 'Temperature';
+            iconColor = '#03A9F4';
+            displayValue =
+                typeof value === 'number'
+                    ? `${value.toFixed(1)}°C`
+                    : String(value);
             break;
 
         default:

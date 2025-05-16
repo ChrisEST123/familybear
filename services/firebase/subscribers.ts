@@ -114,3 +114,19 @@ export const subscribeToBatteryLevel = (callback: (level: number) => void) => {
         if (typeof val === 'number') callback(val);
     });
 };
+
+export const subscribeToBearHeatStatus = (
+    callback: (data: { temperature: number; active: boolean }) => void
+) => {
+    const refPath = ref(db, '/commands/heat');
+    return onValue(refPath, (snapshot) => {
+        const val = snapshot.val();
+        if (
+            val &&
+            typeof val.temperature === 'number' &&
+            typeof val.active === 'boolean'
+        ) {
+            callback(val);
+        }
+    });
+};
