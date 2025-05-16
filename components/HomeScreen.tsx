@@ -8,6 +8,7 @@ import { PrimaryButton } from '@/components/basic/PrimaryButton';
 import { globalStyles } from '@/constants/styles';
 import {
     subscribeToActiveHeartbeatSetting,
+    subscribeToBatteryLevel,
     subscribeToBearGpsData,
     subscribeToGpsEnabled,
     subscribeToLastSeen,
@@ -27,6 +28,7 @@ const HomeScreen: React.FC = () => {
     const [geoFenceStatus, setGeoFenceStatus] = useState<boolean | 'unknown'>(
         'unknown'
     );
+    const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
 
     useEffect(() => {
         const unsubscribe = subscribeToVibrationStatus(setVibration);
@@ -66,7 +68,7 @@ const HomeScreen: React.FC = () => {
             if (preset) setHeartbeatPreset(preset);
         });
 
-        return () => unsubscribe(); // clean up listener
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
@@ -85,6 +87,11 @@ const HomeScreen: React.FC = () => {
         };
     }, []);
 
+    useEffect(() => {
+        const unsubscribe = subscribeToBatteryLevel(setBatteryLevel);
+        return () => unsubscribe();
+    }, []);
+
     return (
         <View style={globalStyles.root}>
             <ScrollView contentContainerStyle={globalStyles.container}>
@@ -93,7 +100,10 @@ const HomeScreen: React.FC = () => {
                         type="connection"
                         value={connected}
                     />
-                    <BearStatusTileWrapper type="battery" value={82} />
+                    <BearStatusTileWrapper
+                        type="battery"
+                        value={batteryLevel ?? 0}
+                    />
                     <BearStatusTileWrapper type="vibration" value={vibration} />
                     <BearStatusTileWrapper
                         type="heartbeat"

@@ -106,3 +106,11 @@ export const subscribeToGpsEnabled = (callback: (value: boolean) => void) => {
         callback(!!snapshot.val());
     });
 };
+
+export const subscribeToBatteryLevel = (callback: (level: number) => void) => {
+    const batteryRef = ref(db, '/status/bear/battery');
+    return onValue(batteryRef, (snapshot) => {
+        const val = snapshot.val();
+        if (typeof val === 'number') callback(val);
+    });
+};
