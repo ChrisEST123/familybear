@@ -83,3 +83,26 @@ export const subscribeToLastSeen = (
 
     return () => unsubscribe();
 };
+
+export const subscribeToBearGpsData = (
+    callback: (data: {
+        latitude: number;
+        longitude: number;
+        geoFence?: string;
+    }) => void
+) => {
+    const gpsRef = ref(db, '/status/gps');
+    return onValue(gpsRef, (snapshot) => {
+        const val = snapshot.val();
+        if (val?.latitude && val?.longitude) {
+            callback(val);
+        }
+    });
+};
+
+export const subscribeToGpsEnabled = (callback: (value: boolean) => void) => {
+    const gpsRef = ref(db, '/status/app/gps');
+    return onValue(gpsRef, (snapshot) => {
+        callback(!!snapshot.val());
+    });
+};

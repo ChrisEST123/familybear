@@ -8,6 +8,8 @@ import { PrimaryButton } from '@/components/basic/PrimaryButton';
 import { globalStyles } from '@/constants/styles';
 import {
     subscribeToActiveHeartbeatSetting,
+    subscribeToBearGpsData,
+    subscribeToGpsEnabled,
     subscribeToLastSeen,
     subscribeToVibrationStatus,
 } from '@/services/firebase/subscribers';
@@ -21,6 +23,10 @@ const HomeScreen: React.FC = () => {
     });
     const [vibration, setVibration] = useState(false);
     const [connected, setConnected] = useState(false);
+    const [gpsEnabled, setGpsEnabled] = useState(false);
+    const [geoFenceStatus, setGeoFenceStatus] = useState<boolean | 'unknown'>(
+        'unknown'
+    );
 
     useEffect(() => {
         const unsubscribe = subscribeToVibrationStatus(setVibration);
@@ -63,6 +69,22 @@ const HomeScreen: React.FC = () => {
         return () => unsubscribe(); // clean up listener
     }, []);
 
+    useEffect(() => {
+        const unsubGps = subscribeToGpsEnabled(setGpsEnabled);
+        const unsubGpsData = subscribeToBearGpsData((data) => {
+            if ('geoFence' in data && typeof data.geoFence === 'boolean') {
+                setGeoFenceStatus(data.geoFence);
+            } else {
+                setGeoFenceStatus('unknown');
+            }
+        });
+
+        return () => {
+            unsubGps();
+            unsubGpsData();
+        };
+    }, []);
+
     return (
         <View style={globalStyles.root}>
             <ScrollView contentContainerStyle={globalStyles.container}>
@@ -77,6 +99,11 @@ const HomeScreen: React.FC = () => {
                         type="heartbeat"
                         value={heartbeatPreset!.label}
                     />
+                    <BearStatusTileWrapper type="gps" value={gpsEnabled} />
+                    <BearStatusTileWrapper
+                        type="geoFence"
+                        value={gpsEnabled ? geoFenceStatus : 'unknown'}
+                    />
                 </View>
 
                 <PrimaryButton
@@ -84,6 +111,11 @@ const HomeScreen: React.FC = () => {
                     onPress={() =>
                         router.push('/(tabs)/(stacked)/heartbeatSettings')
                     }
+                />
+
+                <PrimaryButton
+                    label="Bear GPS"
+                    onPress={() => router.push('/(tabs)/(stacked)/gps')}
                 />
             </ScrollView>
         </View>
