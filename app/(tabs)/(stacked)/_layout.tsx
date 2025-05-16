@@ -18,6 +18,14 @@ export default function Layout() {
                     headerBackVisible: true,
                 }}
             />
+
+            <Stack.Screen
+                name="gps"
+                options={{
+                    title: 'Bear GPS',
+                    headerBackVisible: true,
+                }}
+            />
         </Stack>
     );
 }

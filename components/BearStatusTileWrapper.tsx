@@ -3,7 +3,14 @@ import React from 'react';
 import BearStatusTile from './BearStatusTile';
 
 interface BearStatusTileWrapperProps {
-    type: 'connection' | 'battery' | 'vibration' | 'heartbeat' | 'wakeupMode';
+    type:
+        | 'connection'
+        | 'battery'
+        | 'vibration'
+        | 'heartbeat'
+        | 'wakeupMode'
+        | 'gps'
+        | 'geoFence';
     value: string | number | boolean;
 }
 
@@ -64,6 +71,30 @@ const BearStatusTileWrapper: React.FC<BearStatusTileWrapperProps> = ({
             const stringVal = String(value);
             iconColor = stringVal.includes('Active') ? '#FFC107' : '#999';
             displayValue = stringVal;
+            break;
+
+        case 'gps':
+            iconName = 'location-arrow';
+            label = 'GPS';
+            const gpsOn = value === true || value === 'On';
+            iconColor = gpsOn ? '#4CAF50' : '#999';
+            displayValue = gpsOn ? 'On' : 'Off';
+            break;
+
+        case 'geoFence':
+            iconName = 'shield-alt';
+            label = 'Safe Zone';
+
+            if (value === 'inside' || value === true) {
+                iconColor = '#4CAF50';
+                displayValue = 'In Safe Zone';
+            } else if (value === 'outside' || value === false) {
+                iconColor = '#F44336';
+                displayValue = 'Outside Zone';
+            } else {
+                iconColor = '#999';
+                displayValue = 'Unknown';
+            }
             break;
 
         default:
