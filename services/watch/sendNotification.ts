@@ -1,29 +1,46 @@
-import { NativeModules } from 'react-native';
+import * as FileSystem from 'expo-file-system';
+import * as Notifications from 'expo-notifications';
+import { Platform } from 'react-native';
 
-const { WatchBridge } = NativeModules;
-
-interface NotificationPayload {
-    title: string;
-    message: string;
-    imageUri?: string;
-}
-
-export const sendWatchNotification = async ({
+export const sendInAppNotification = async ({
     title,
     message,
     imageUri,
-}: NotificationPayload) => {
-    if (!WatchBridge || typeof WatchBridge.sendToWatch !== 'function') {
-        console.log(
-            '[WatchBridge] No connected watch or native module. Skipping send.'
-        );
-        return;
+}: {
+    title: string;
+    message: string;
+    imageUri?: string;
+}) => {
+    let localImagePath: string | undefined;
+
+    if (imageUri && Platform.OS === 'ios') {
+        try {
+            const filename = imageUri.split('/').pop() ?? 'image.jpg';
+            const path = `${FileSystem.cacheDirectory}${filename}`;
+            const download = await FileSystem.downloadAsync(imageUri, path);
+            localImagePath = download.uri;
+        } catch (err) {
+            console.warn('Failed to download image for notification:', err);
+        }
     }
 
-    try {
-        await WatchBridge.sendToWatch(title, message, imageUri ?? null);
-        console.log('[WatchBridge] Sent payload to watch.');
-    } catch (error) {
-        console.warn('[WatchBridge] Error sending to watch:', error);
-    }
+    await Notifications.scheduleNotificationAsync({
+        content: {
+            title,
+            body: message,
+            sound: 'default',
+            ...(localImagePath && Platform.OS === 'ios'
+                ? {
+                      attachments: [
+                          {
+                              identifier: 'image',
+                              url: localImagePath,
+                              type: 'image/jpeg',
+                          },
+                      ],
+                  }
+                : {}),
+        },
+        trigger: null,
+    });
 };
