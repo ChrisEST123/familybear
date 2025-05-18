@@ -1,6 +1,9 @@
 import * as FileSystem from 'expo-file-system';
 import * as Notifications from 'expo-notifications';
+import { get, ref, update } from 'firebase/database';
 import { Platform } from 'react-native';
+
+import { db } from '@/firebase';
 
 export const sendInAppNotification = async ({
     title,
@@ -43,4 +46,23 @@ export const sendInAppNotification = async ({
         },
         trigger: null,
     });
+};
+
+interface NotificationPrefs {
+    bearPickup?: boolean;
+    geoFenceBreach?: boolean;
+    lowBattery?: boolean;
+}
+
+export const fetchNotificationSettings =
+    async (): Promise<NotificationPrefs> => {
+        const snap = await get(ref(db, '/status/app/notifications'));
+        return snap.exists() ? snap.val() : {};
+    };
+
+export const setNotificationSetting = async (
+    key: keyof NotificationPrefs,
+    value: boolean
+) => {
+    return update(ref(db, '/status/app/notifications'), { [key]: value });
 };

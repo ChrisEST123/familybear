@@ -12,26 +12,40 @@ export const GeoFenceAlertListenerProvider: React.FC<Props> = ({
     children,
 }) => {
     const triggeredRef = useRef(false);
+    const enabledRef = useRef(false);
 
     useEffect(() => {
         const gpsRef = ref(db, '/status/app/gps');
-        const geoFenceRef = ref(db, '/status/bear/gps/geoFence');
+        const geoFenceRef = ref(db, '/status/gps/geofence');
+        const settingRef = ref(db, '/status/app/notifications/geoFenceBreach');
 
         let gps = false;
         let geoFence = true;
 
-        const maybeTriggerNotification = () => {
+        const unsubscribeSetting = onValue(settingRef, (snapshot) => {
+            enabledRef.current = !!snapshot.val();
+            console.log('Notification setting updated:', enabledRef.current);
+        });
+
+        const maybeTriggerNotification = async () => {
+            if (!enabledRef.current) return;
+
             if (gps && !geoFence && !triggeredRef.current) {
                 triggeredRef.current = true;
 
-                Notifications.scheduleNotificationAsync({
-                    content: {
-                        title: 'Bear Left Safe Zone',
-                        body: 'GPS is active and the bear is outside the designated area!',
-                        sound: 'default',
-                    },
-                    trigger: null,
-                });
+                try {
+                    await Notifications.scheduleNotificationAsync({
+                        content: {
+                            title: 'Bear Left Safe Zone',
+                            body: 'GPS is active and the bear is outside the designated area!',
+                            sound: 'default',
+                        },
+                        trigger: null,
+                    });
+                    console.log('Notification sent');
+                } catch (err) {
+                    console.error('Failed to send notification:', err);
+                }
             }
 
             if (!gps || geoFence) {
@@ -50,6 +64,7 @@ export const GeoFenceAlertListenerProvider: React.FC<Props> = ({
         });
 
         return () => {
+            unsubscribeSetting();
             unsubscribeGps();
             unsubscribeGeoFence();
         };
