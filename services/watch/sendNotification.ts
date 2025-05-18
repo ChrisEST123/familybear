@@ -5,6 +5,13 @@ import { Platform } from 'react-native';
 
 import { db } from '@/firebase';
 
+/**
+ * Sends a local in-app notification with optional image attachment (iOS only, not tested).
+ *
+ * @param title - Notification title
+ * @param message - Notification message body
+ * @param imageUri - Optional image URL to attach (only on iOS)
+ */
 export const sendInAppNotification = async ({
     title,
     message,
@@ -16,6 +23,7 @@ export const sendInAppNotification = async ({
 }) => {
     let localImagePath: string | undefined;
 
+    // On iOS, download the image locally so it can be used as an attachment
     if (imageUri && Platform.OS === 'ios') {
         try {
             const filename = imageUri.split('/').pop() ?? 'image.jpg';
@@ -27,11 +35,13 @@ export const sendInAppNotification = async ({
         }
     }
 
+    // Schedule the local notification
     await Notifications.scheduleNotificationAsync({
         content: {
             title,
             body: message,
             sound: 'default',
+            // Attach the image if available (iOS only)
             ...(localImagePath && Platform.OS === 'ios'
                 ? {
                       attachments: [
@@ -44,22 +54,33 @@ export const sendInAppNotification = async ({
                   }
                 : {}),
         },
-        trigger: null,
+        trigger: null, // Immediate trigger
     });
 };
 
+// Type definition for notification preferences stored in Firebase
 interface NotificationPrefs {
     bearPickup?: boolean;
     geoFenceBreach?: boolean;
     lowBattery?: boolean;
 }
 
+/**
+ * Fetches current notification settings from Firebase.
+ * @returns A record of enabled/disabled preferences
+ */
 export const fetchNotificationSettings =
     async (): Promise<NotificationPrefs> => {
         const snap = await get(ref(db, '/status/app/notifications'));
         return snap.exists() ? snap.val() : {};
     };
 
+/**
+ * Updates a single notification preference in Firebase.
+ *
+ * @param key - The specific notification type (e.g., 'bearPickup')
+ * @param value - Whether the notification is enabled (true) or disabled (false)
+ */
 export const setNotificationSetting = async (
     key: keyof NotificationPrefs,
     value: boolean

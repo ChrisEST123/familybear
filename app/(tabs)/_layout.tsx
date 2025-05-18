@@ -4,6 +4,7 @@ import { Tabs } from 'expo-router';
 export default function TabsLayout() {
     return (
         <Tabs
+            // Global screen styling for all tabs
             screenOptions={{
                 headerTitleAlign: 'center',
                 headerTitleStyle: {
@@ -12,6 +13,7 @@ export default function TabsLayout() {
                 },
             }}
         >
+            {/* Home/Dashboard tab */}
             <Tabs.Screen
                 name="index"
                 options={{
@@ -22,6 +24,7 @@ export default function TabsLayout() {
                 }}
             />
 
+            {/* Bear settings screen (e.g., heartbeat, sound, heat) */}
             <Tabs.Screen
                 name="bearSettings"
                 options={{
@@ -32,6 +35,7 @@ export default function TabsLayout() {
                 }}
             />
 
+            {/* App-level configuration/settings screen */}
             <Tabs.Screen
                 name="appSettings"
                 options={{
@@ -42,11 +46,12 @@ export default function TabsLayout() {
                 }}
             />
 
+            {/* Hidden route for stacked navigation flows (e.g., detail views) */}
             <Tabs.Screen
                 name="(stacked)"
                 options={{
-                    href: null,
-                    headerShown: false,
+                    href: null, // Prevents it from showing in the tab bar
+                    headerShown: false, // Hides header when this stack is active
                 }}
             />
         </Tabs>

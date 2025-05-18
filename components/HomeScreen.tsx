@@ -19,10 +19,13 @@ import {
 const HomeScreen: React.FC = () => {
     const router = useRouter();
 
+    // --- State Management for Live Data ---
+
     const [heartbeatPreset, setHeartbeatPreset] = useState({
         id: 'test-id',
         label: 'Test',
     });
+
     const [vibration, setVibration] = useState(false);
     const [connected, setConnected] = useState(false);
     const [gpsEnabled, setGpsEnabled] = useState(false);
@@ -34,6 +37,8 @@ const HomeScreen: React.FC = () => {
         temperature: number;
         active: boolean;
     } | null>(null);
+
+    // --- Subscriptions to Firebase Realtime Data ---
 
     useEffect(() => {
         const unsubscribe = subscribeToVibrationStatus(setVibration);
@@ -49,10 +54,10 @@ const HomeScreen: React.FC = () => {
                 return;
             }
 
+            // Check if lastSeen is within 10 seconds to infer connection
             const check = () => {
                 const now = Date.now();
                 const lastSeenMs = lastSeen * 1000;
-
                 setConnected(now - lastSeenMs < 10000);
             };
 
@@ -72,7 +77,6 @@ const HomeScreen: React.FC = () => {
         const unsubscribe = subscribeToActiveHeartbeatSetting((preset) => {
             if (preset) setHeartbeatPreset(preset);
         });
-
         return () => unsubscribe();
     }, []);
 
@@ -102,9 +106,12 @@ const HomeScreen: React.FC = () => {
         return () => unsubscribe();
     }, []);
 
+    // --- UI Rendering ---
+
     return (
         <View style={globalStyles.root}>
             <ScrollView contentContainerStyle={globalStyles.container}>
+                {/* Status Tiles Displaying Live Bear Data */}
                 <View style={styles.statusGrid}>
                     <BearStatusTileWrapper
                         type="connection"
@@ -130,6 +137,7 @@ const HomeScreen: React.FC = () => {
                     />
                 </View>
 
+                {/* Navigation Buttons to Settings Screens */}
                 <PrimaryButton
                     label="Change Heartbeat Setting"
                     onPress={() =>
@@ -154,6 +162,8 @@ const HomeScreen: React.FC = () => {
 };
 
 export default HomeScreen;
+
+// --- Styles ---
 
 const styles = StyleSheet.create({
     statusGrid: {

@@ -25,6 +25,7 @@ import { readCurrentHeartRate } from '@/services/heartRate/liveHeartRateService'
 import { validateHeartbeatInput } from '@/utils/validations';
 
 const HeartbeatSettingsScreen: React.FC = () => {
+    // === State Management ===
     const [mode, setMode] = useState<
         'realtime' | 'preset' | 'custom' | 'wakeupmode'
     >();
@@ -45,6 +46,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
     const [wakeupScheduleEnabled, setWakeupScheduleEnabled] = useState(false);
     const [wakeupTime, setWakeupTime] = useState(new Date());
 
+    // === Reset state on screen unfocus ===
     useFocusEffect(
         useCallback(() => {
             return () => {
@@ -53,12 +55,12 @@ const HeartbeatSettingsScreen: React.FC = () => {
         }, [])
     );
 
+    // === Firebase Subscriptions ===
     useEffect(() => {
         const unsubscribe = subscribeToActiveHeartbeatSetting((preset) => {
             if (preset) setHeartbeatPreset(preset);
         });
-
-        return () => unsubscribe(); // clean up listener
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
@@ -66,6 +68,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
         return () => unsubscribe();
     }, []);
 
+    // === Sync wakeup mode time to local Date object ===
     useEffect(() => {
         if (wakeupModeStatus.time) {
             const [hh, mm] = wakeupModeStatus.time.split(':');
@@ -77,6 +80,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
         setWakeupScheduleEnabled(wakeupModeStatus.enabled);
     }, [wakeupModeStatus]);
 
+    // === Live Heart Rate Capture (Realtime Mode) ===
     useEffect(() => {
         if (mode === 'realtime') {
             const loadLiveData = async () => {
@@ -103,6 +107,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
         }
     }, [mode]);
 
+    // === Clear fields if switching out of realtime mode ===
     useEffect(() => {
         if (mode === 'custom' && prevMode === 'realtime') {
             resetCustomFormFields();
@@ -114,6 +119,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
         setMode(newMode);
     };
 
+    // === Apply and save a custom heartbeat ===
     const handleApplyCustom = async () => {
         const bpm = parseInt(customBpm, 10);
         const freq = parseFloat(customFreq);
@@ -143,10 +149,7 @@ const HeartbeatSettingsScreen: React.FC = () => {
         };
 
         try {
-            // Send command to apply
             await activateHeartbeatPreset(payload);
-
-            // Also save to presets
             await saveCustomHeartbeatPreset(payload);
 
             Alert.alert(
@@ -170,9 +173,11 @@ const HeartbeatSettingsScreen: React.FC = () => {
         setPresetLabel('');
     };
 
+    // === Render UI ===
     return (
         <View style={globalStyles.root}>
             <ScrollView contentContainerStyle={styles.container}>
+                {/* Status Summary Tiles */}
                 <View style={styles.statusGrid}>
                     <BearStatusTileWrapper
                         type="heartbeat"
@@ -188,12 +193,14 @@ const HeartbeatSettingsScreen: React.FC = () => {
                     />
                 </View>
 
+                {/* Mode Selector */}
                 <HeartbeatModeSelector
                     mode={mode}
                     setMode={handleModeChange}
                     onUseRealTime={() => handleModeChange('realtime')}
                 />
 
+                {/* Dynamic Views Based on Selected Mode */}
                 {mode === 'realtime' && (
                     <CustomHeartbeatForm
                         bpm={customBpm}
@@ -245,6 +252,8 @@ const HeartbeatSettingsScreen: React.FC = () => {
 };
 
 export default HeartbeatSettingsScreen;
+
+// === Styles ===
 
 const styles = StyleSheet.create({
     container: {

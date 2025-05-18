@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 export default function Layout() {
     return (
         <Stack
+            // Default styling for all headers in this stack
             screenOptions={{
                 headerTitleAlign: 'center',
                 headerTitleStyle: {
@@ -11,14 +12,16 @@ export default function Layout() {
                 },
             }}
         >
+            {/* Heartbeat settings screen */}
             <Stack.Screen
                 name="heartbeatSettings"
                 options={{
-                    title: 'Choose heartbeat settings',
-                    headerBackVisible: true,
+                    title: 'Choose heartbeat settings', // Screen title in header
+                    headerBackVisible: true, // Show back button in header
                 }}
             />
 
+            {/* GPS tracking status and controls */}
             <Stack.Screen
                 name="gps"
                 options={{
@@ -27,6 +30,7 @@ export default function Layout() {
                 }}
             />
 
+            {/* Heat settings screen for controlling temperature */}
             <Stack.Screen
                 name="heatSettings"
                 options={{

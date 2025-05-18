@@ -11,12 +11,14 @@ import {
 } from '@/services/watch/sendNotification';
 
 const AppSettingsScreen: React.FC = () => {
+    // Local state to track notification settings for each alert type
     const [settings, setSettings] = useState({
         bearPickup: false,
         geoFenceBreach: false,
         lowBattery: false,
     });
 
+    // On mount, load settings from Firebase
     useEffect(() => {
         const loadSettings = async () => {
             const fetched = await fetchNotificationSettings();
@@ -26,12 +28,17 @@ const AppSettingsScreen: React.FC = () => {
         loadSettings();
     }, []);
 
+    /**
+     * Toggles a notification setting in local state and persists it to Firebase.
+     * @param key - The setting key being toggled (e.g., 'bearPickup')
+     */
     const toggle = (key: keyof typeof settings) => {
         const newValue = !settings[key];
         setSettings((prev) => ({ ...prev, [key]: newValue }));
         setNotificationSetting(key, newValue);
     };
 
+    // === UI Rendering ===
     return (
         <ScrollView style={[globalStyles.root, styles.container]}>
             <CustomToggle
@@ -55,6 +62,7 @@ const AppSettingsScreen: React.FC = () => {
 
 export default AppSettingsScreen;
 
+// === Styles ===
 const styles = StyleSheet.create({
     container: {
         padding: spacing.lg,

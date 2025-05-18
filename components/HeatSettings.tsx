@@ -7,7 +7,6 @@ import {
     Alert,
     TextInput,
     Switch,
-    Modal,
 } from 'react-native';
 
 import BearStatusTileWrapper from '@/components/BearStatusTileWrapper';
@@ -21,8 +20,9 @@ import { subscribeToBearHeatStatus } from '@/services/firebase/subscribers';
 import { readCurrentTemperature } from '@/services/temperature/liveTemperatureService';
 
 const HeatSettingsScreen: React.FC = () => {
-    const [mode, setMode] = useState<'live' | 'custom' | undefined>();
-    const [prevMode, setPrevMode] = useState<typeof mode>();
+    // === Local state variables ===
+    const [mode, setMode] = useState<'live' | 'custom' | undefined>(); // Currently selected mode
+    const [prevMode, setPrevMode] = useState<typeof mode>(); // Used to reset unused values
     const [customTemperature, setCustomTemperature] = useState('');
     const [liveReading, setLiveReading] = useState<number | null>(null);
     const [showLiveModal, setShowLiveModal] = useState(false);
@@ -31,11 +31,13 @@ const HeatSettingsScreen: React.FC = () => {
         active: boolean;
     } | null>(null);
 
+    // === Subscribe to live heat status from Firebase ===
     useEffect(() => {
         const unsub = subscribeToBearHeatStatus(setHeatStatus);
         return () => unsub();
     }, []);
 
+    // === Reset opposing state when switching modes ===
     useEffect(() => {
         if (mode === 'custom' && prevMode === 'live') {
             setLiveReading(null);
@@ -44,6 +46,10 @@ const HeatSettingsScreen: React.FC = () => {
         }
     }, [mode, prevMode]);
 
+    /**
+     * Handles switching to live or custom mode.
+     * For live mode, initiates a reading from the smartwatch and shows a modal.
+     */
     const handleModeChange = async (newMode: typeof mode) => {
         setPrevMode(mode);
         setMode(newMode);
@@ -61,8 +67,12 @@ const HeatSettingsScreen: React.FC = () => {
         }
     };
 
+    /**
+     * Applies the live temperature value read from the smartwatch.
+     */
     const handleApplyLiveTemp = async () => {
         if (liveReading === null) return;
+
         try {
             await sendHeatTemperature(liveReading);
             Alert.alert('Success', `Live temperature ${liveReading}°C applied`);
@@ -73,6 +83,9 @@ const HeatSettingsScreen: React.FC = () => {
         }
     };
 
+    /**
+     * Validates and applies a custom temperature input.
+     */
     const handleApplyCustomTemperature = async () => {
         const value = parseFloat(customTemperature.trim());
         if (isNaN(value) || value < 34 || value > 39) {
@@ -92,6 +105,9 @@ const HeatSettingsScreen: React.FC = () => {
         }
     };
 
+    /**
+     * Toggles heating on or off.
+     */
     const handleToggleHeat = async (val: boolean) => {
         try {
             await setHeatActive(val);
@@ -101,9 +117,11 @@ const HeatSettingsScreen: React.FC = () => {
         }
     };
 
+    // === UI Rendering ===
     return (
         <View style={globalStyles.root}>
             <ScrollView contentContainerStyle={styles.container}>
+                {/* --- Status Tiles --- */}
                 <View style={styles.statusGrid}>
                     <BearStatusTileWrapper
                         type="heat"
@@ -119,6 +137,7 @@ const HeatSettingsScreen: React.FC = () => {
                     />
                 </View>
 
+                {/* --- Heating Toggle --- */}
                 <View style={styles.switchRow}>
                     <Text style={styles.label}>Heating Active</Text>
                     <Switch
@@ -127,6 +146,7 @@ const HeatSettingsScreen: React.FC = () => {
                     />
                 </View>
 
+                {/* --- Mode Selection --- */}
                 <View style={styles.optionBox}>
                     <PrimaryButton
                         label="Use Custom Temperature"
@@ -138,6 +158,7 @@ const HeatSettingsScreen: React.FC = () => {
                     />
                 </View>
 
+                {/* --- Custom Input UI --- */}
                 {mode === 'custom' && (
                     <View>
                         <Text style={styles.label}>
@@ -159,6 +180,7 @@ const HeatSettingsScreen: React.FC = () => {
                 )}
             </ScrollView>
 
+            {/* --- Modal for Live Temperature Confirmation --- */}
             <ModalWrapper
                 visible={showLiveModal}
                 message={`Use ${liveReading?.toFixed(1)}°C from smartwatch?`}
@@ -176,6 +198,8 @@ const HeatSettingsScreen: React.FC = () => {
 };
 
 export default HeatSettingsScreen;
+
+// === Styles ===
 
 const styles = StyleSheet.create({
     container: {
