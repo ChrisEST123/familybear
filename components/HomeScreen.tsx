@@ -79,8 +79,8 @@ const HomeScreen: React.FC = () => {
     useEffect(() => {
         const unsubGps = subscribeToGpsEnabled(setGpsEnabled);
         const unsubGpsData = subscribeToBearGpsData((data) => {
-            if ('geoFence' in data && typeof data.geoFence === 'boolean') {
-                setGeoFenceStatus(data.geoFence);
+            if ('geofence' in data && typeof data.geofence === 'boolean') {
+                setGeoFenceStatus(data.geofence);
             } else {
                 setGeoFenceStatus('unknown');
             }

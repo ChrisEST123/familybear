@@ -30,8 +30,8 @@ const BearGps: React.FC = () => {
             unsubGpsData = subscribeToBearGpsData((data) => {
                 setGpsData(data);
 
-                if ('geoFence' in data && typeof data.geoFence === 'boolean') {
-                    setGeoFenceStatus(data.geoFence); // true or false
+                if ('geofence' in data && typeof data.geofence === 'boolean') {
+                    setGeoFenceStatus(data.geofence);
                 } else {
                     setGeoFenceStatus('unknown');
                 }
