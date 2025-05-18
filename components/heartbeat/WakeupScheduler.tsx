@@ -8,18 +8,25 @@ import { TimePicker } from '@/components/basic/TimePicker';
 import { updateWakeupMode } from '@/services/firebase/wakeUpMode';
 
 interface Props {
-    time: Date;
-    setTime: (v: Date) => void;
-    enabled: boolean;
-    setEnabled: (v: boolean) => void;
+    time: Date; // Currently selected wake-up time
+    setTime: (v: Date) => void; // Function to update wake-up time
+    enabled: boolean; // Whether scheduled wake-up mode is active
+    setEnabled: (v: boolean) => void; // Function to toggle wake-up mode
 }
 
+/**
+ * WakeupScheduler allows users to schedule a specific time for the bear
+ * to automatically activate wake-up mode (e.g. buzz/vibrate to wake child).
+ */
 export const WakeupScheduler: React.FC<Props> = ({
     time,
     setTime,
     enabled,
     setEnabled,
 }) => {
+    /**
+     * Submits the selected time and toggle state to Firebase.
+     */
     const handleSubmit = async () => {
         try {
             const hh = time.getHours().toString().padStart(2, '0');
@@ -30,7 +37,7 @@ export const WakeupScheduler: React.FC<Props> = ({
 
             Alert.alert(
                 'Schedule Updated',
-                `Wake-up at ${time} is ${enabled ? 'enabled' : 'disabled'}.`
+                `Wake-up at ${time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} is ${enabled ? 'enabled' : 'disabled'}.`
             );
         } catch (err) {
             console.error('Error scheduling wakeup:', err);
@@ -38,17 +45,21 @@ export const WakeupScheduler: React.FC<Props> = ({
         }
     };
 
+    // === UI Rendering ===
     return (
         <View style={styles.section}>
             <Text style={styles.sectionTitle}>Wake Up Mode Scheduler</Text>
 
+            {/* Toggle to enable or disable scheduled wake-up */}
             <View style={styles.switchRow}>
                 <Text style={styles.label}>Enable Scheduled Wakeup</Text>
                 <Switch value={enabled} onValueChange={setEnabled} />
             </View>
 
+            {/* Time picker component for choosing the schedule */}
             <TimePicker time={time} setTime={setTime} />
 
+            {/* Submit button to apply schedule */}
             <PrimaryButton label="Set Wake Up Time" onPress={handleSubmit} />
         </View>
     );

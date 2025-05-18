@@ -9,10 +9,15 @@ interface Props {
     children: ReactNode;
 }
 
+/**
+ * Listens for bear pickup events (via FSR sensor)
+ * and sends an in-app notification if notifications are enabled.
+ */
 export const BearPickupListenerProvider: React.FC<Props> = ({ children }) => {
-    const triggeredRef = useRef(false);
-    const enabledRef = useRef(false);
+    const triggeredRef = useRef(false); // Prevents repeated notifications
+    const enabledRef = useRef(false); // Tracks if user has enabled this notification
 
+    // Request notification permissions on mount
     useEffect(() => {
         const requestPermission = async () => {
             const settings = await Notifications.getPermissionsAsync();
@@ -25,6 +30,7 @@ export const BearPickupListenerProvider: React.FC<Props> = ({ children }) => {
         requestPermission();
     }, []);
 
+    // Listen to user preference for pickup notifications from Firebase
     useEffect(() => {
         const settingRef = ref(db, '/status/app/notifications/bearPickup');
 
@@ -36,8 +42,10 @@ export const BearPickupListenerProvider: React.FC<Props> = ({ children }) => {
         return () => unsubscribe();
     }, []);
 
+    // Subscribe to FSR (pickup sensor) status
     useEffect(() => {
         const unsubscribe = subscribeToFsrStatus(async (value) => {
+            // Trigger notification only once per pickup while notifications are enabled
             if (value && !triggeredRef.current && enabledRef.current) {
                 triggeredRef.current = true;
 
@@ -48,7 +56,7 @@ export const BearPickupListenerProvider: React.FC<Props> = ({ children }) => {
                             body: 'The bear was picked up!',
                             sound: 'default',
                         },
-                        trigger: null,
+                        trigger: null, // Fire immediately
                     });
                     console.log('Notification scheduled');
                 } catch (err) {
@@ -56,13 +64,14 @@ export const BearPickupListenerProvider: React.FC<Props> = ({ children }) => {
                 }
             }
 
+            // Reset trigger when bear is released
             if (!value) {
                 triggeredRef.current = false;
             }
         });
 
-        return () => unsubscribe();
+        return () => unsubscribe(); // Clean up subscription on unmount
     }, []);
 
-    return <>{children}</>;
+    return <>{children}</>; // Acts as a wrapper with side effects only
 };

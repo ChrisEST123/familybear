@@ -12,14 +12,18 @@ import { colors } from '@/constants/colors';
 import { spacing } from '@/constants/spacing';
 
 interface ModalWrapperProps {
-    visible: boolean;
-    onConfirm: (e: GestureResponderEvent) => void;
-    onCancel: (e: GestureResponderEvent) => void;
-    confirmLabel?: string;
-    cancelLabel?: string;
-    message: string;
+    visible: boolean; // Controls visibility of the modal
+    onConfirm: (e: GestureResponderEvent) => void; // Handler for confirm button
+    onCancel: (e: GestureResponderEvent) => void; // Handler for cancel button
+    confirmLabel?: string; // Custom text for confirm button
+    cancelLabel?: string; // Custom text for cancel button
+    message: string; // Message shown in the modal
 }
 
+/**
+ * Reusable modal wrapper for simple confirm/cancel dialogs.
+ * Can be used for confirmation prompts, warnings, or action triggers.
+ */
 export const ModalWrapper: React.FC<ModalWrapperProps> = ({
     visible,
     onConfirm,
@@ -33,12 +37,16 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
             <View style={styles.overlay}>
                 <View style={styles.box}>
                     <Text style={styles.message}>{message}</Text>
+
+                    {/* Confirm action */}
                     <TouchableOpacity
                         style={styles.confirmButton}
                         onPress={onConfirm}
                     >
                         <Text style={styles.buttonText}>{confirmLabel}</Text>
                     </TouchableOpacity>
+
+                    {/* Cancel action */}
                     <TouchableOpacity
                         style={styles.cancelButton}
                         onPress={onCancel}
@@ -51,6 +59,7 @@ export const ModalWrapper: React.FC<ModalWrapperProps> = ({
     );
 };
 
+// === Styles ===
 const styles = StyleSheet.create({
     overlay: {
         flex: 1,
@@ -74,7 +83,7 @@ const styles = StyleSheet.create({
         textAlign: 'center',
     },
     confirmButton: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#4CAF50', // Success green
         borderRadius: 10,
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.lg,
@@ -82,7 +91,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     cancelButton: {
-        backgroundColor: '#F44336',
+        backgroundColor: '#F44336', // Danger red
         borderRadius: 10,
         paddingVertical: spacing.sm,
         paddingHorizontal: spacing.lg,

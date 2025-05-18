@@ -8,15 +8,20 @@ interface Props {
     children: ReactNode;
 }
 
+/**
+ * Listens for low battery events from the bear and triggers a notification
+ * if the battery drops below a defined threshold and alerts are enabled.
+ */
 export const BatteryAlertListenerProvider: React.FC<Props> = ({ children }) => {
-    const triggeredRef = useRef(false);
-    const notificationsEnabledRef = useRef(false);
-    const THRESHOLD = 20;
+    const triggeredRef = useRef(false); // Prevents repeat notifications until battery is recharged
+    const notificationsEnabledRef = useRef(false); // Tracks user setting
+    const THRESHOLD = 20; // Battery percentage threshold for alerts
 
     useEffect(() => {
-        const batteryRef = ref(db, '/status/bear/battery');
-        const settingRef = ref(db, '/status/app/notifications/lowBattery');
+        const batteryRef = ref(db, '/status/bear/battery'); // Path to battery level
+        const settingRef = ref(db, '/status/app/notifications/lowBattery'); // Path to user setting
 
+        // Listen for changes to the low battery notification setting
         const unsubscribeSetting = onValue(settingRef, (snapshot) => {
             notificationsEnabledRef.current = !!snapshot.val();
             console.log(
@@ -25,10 +30,12 @@ export const BatteryAlertListenerProvider: React.FC<Props> = ({ children }) => {
             );
         });
 
+        // Listen for battery level changes
         const unsubscribeBattery = onValue(batteryRef, async (snapshot) => {
             const battery = snapshot.val();
             if (typeof battery !== 'number') return;
 
+            // Trigger notification only if under threshold, notifications enabled, and not already triggered
             if (
                 battery < THRESHOLD &&
                 !triggeredRef.current &&
@@ -43,7 +50,7 @@ export const BatteryAlertListenerProvider: React.FC<Props> = ({ children }) => {
                             body: `The bear's battery is low (${battery}%). Please recharge it soon.`,
                             sound: 'default',
                         },
-                        trigger: null,
+                        trigger: null, // Send immediately
                     });
                     console.log('Notification sent');
                 } catch (err) {
@@ -51,16 +58,19 @@ export const BatteryAlertListenerProvider: React.FC<Props> = ({ children }) => {
                 }
             }
 
+            // Reset trigger if battery rises above the threshold
             if (battery >= THRESHOLD) {
                 triggeredRef.current = false;
             }
         });
 
+        // Clean up listeners on unmount
         return () => {
             unsubscribeSetting();
             unsubscribeBattery();
         };
     }, []);
 
+    // This provider wraps children but provides no visible context; it just sets up listeners
     return <>{children}</>;
 };

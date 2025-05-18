@@ -2,11 +2,15 @@ import React from 'react';
 import { View, Text, Pressable, StyleSheet } from 'react-native';
 
 interface Props {
-    value: boolean;
-    onToggle: () => void;
-    label: string;
+    value: boolean; // Current toggle state
+    onToggle: () => void; // Function to toggle state
+    label: string; // Descriptive label for the toggle
 }
 
+/**
+ * A simple custom toggle component that displays an ON/OFF box with a label.
+ * Unlike a native Switch, this uses a stylized Pressable for consistent appearance.
+ */
 const CustomToggle: React.FC<Props> = ({ value, onToggle, label }) => {
     return (
         <Pressable onPress={onToggle} style={styles.container}>
@@ -38,10 +42,10 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     on: {
-        backgroundColor: '#4CAF50',
+        backgroundColor: '#4CAF50', // Green for active state
     },
     off: {
-        backgroundColor: '#ccc',
+        backgroundColor: '#ccc', // Gray for inactive state
     },
     state: {
         color: '#fff',

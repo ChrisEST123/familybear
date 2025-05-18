@@ -3,12 +3,16 @@ import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 interface BearStatusTileProps {
-    iconName: string;
-    label: string;
-    value: string;
-    iconColor?: string;
+    iconName: string; // Icon name from FontAwesome5 (e.g., 'wifi', 'fire')
+    label: string; // Title text shown above the value
+    value: string; // The actual data value (e.g., "On", "85%", "Disconnected")
+    iconColor?: string; // Optional icon color (default = dark gray)
 }
 
+/**
+ * A reusable visual tile to display status information with an icon, label, and value.
+ * Used throughout the app for connection, battery, heat, GPS, etc.
+ */
 const BearStatusTile: React.FC<BearStatusTileProps> = ({
     iconName,
     label,
@@ -31,9 +35,10 @@ const BearStatusTile: React.FC<BearStatusTileProps> = ({
 
 export default BearStatusTile;
 
+// === Styles ===
 const styles = StyleSheet.create({
     tile: {
-        flexBasis: '48%',
+        flexBasis: '48%', // Allows 2 tiles per row with spacing
         maxWidth: '48%',
         backgroundColor: '#fdfdfd',
         borderRadius: 12,
@@ -41,6 +46,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 12,
         marginBottom: 12,
         alignItems: 'center',
+
+        // Cross-platform shadow
         elevation: 2,
         shadowColor: '#000',
         shadowOpacity: 0.05,

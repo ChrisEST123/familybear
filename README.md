@@ -69,6 +69,14 @@ Keep in mind IOS has not been the main focus of development.
 
 This will install the native dev client and launch the app directly on your device or emulator.
 
+### 6\. Build APK for Distribution
+
+    npx expo run:android --variant release
+
+APK output location:
+
+    android/app/build/outputs/apk/release/app-release.apk
+
 * * *
 
 📱 Running on Android Emulator
@@ -97,44 +105,45 @@ This will compile and install the app onto the emulator.
 
 * * *
 
-🧪 Local Testing
-----------------
+Troubleshooting
+---------------
 
-### Test Live Features
+### App launches with outdated or incorrect code
 
-*   Use the heartbeat form to submit BPM and frequency
-*   Pick a sound to send from Bear Settings
-*   Toggle and schedule wake-up mode time
-*   Watch status tiles update based on Firebase data
+*   Run `npx expo start --clear` to clear the Metro cache
+*   Ensure changes are saved before building
+*   Ensure correct `.env` is present with no typos
 
-* * *
+### Firebase does not connect
 
-🔧 Troubleshooting
-------------------
+*   Check for internet access on emulator or device
+*   Double-check all keys in `.env`
+*   Ensure Firebase Realtime Database is enabled
+*   If on android make sure `google-services.json` has been added to ./android/app
 
-### ❌ Firebase Not Connecting
+### Notifications are not received
 
-**Problem:** Firebase requests fail or silently time out.
+*   Expo Go does not support push/local notifications in SDK 53+
+*   Use `expo run:android` to install the Dev Client
+*   Ensure the user grants notification permission
+*   Do not send large image payloads as it may cause scheduling failures
 
-**Fix:**
+### Kotlin or Gradle build fails (e.g., BuildConfig not found)
 
-*   Ensure you have internet access on your emulator or device
-*   Restart the emulator
-*   Check your `.env` values
-*   Ensure the correct Firebase Realtime Database URL is used
-
-### ❌ Emulator Cannot Reach Firebase (on localhost)
-
-If you're using a local Firebase emulator or tunneling, run:
-
+    cd android
+    ./gradlew clean
+    cd ..
+    npx expo run:android
     
+
+### Emulator cannot access Firebase Emulator on localhost
+
     adb reverse tcp:9000 tcp:9000
-    
 
-This allows your Android emulator to access your machine's localhost ports.
+This forwards traffic to your local Firebase emulator environment.
 
-### ❌ Firebase Storage Upload Fails
+### Firebase Storage upload fails
 
-**Problem:** Storage uploads fail due to big file size.
-
-**Fix:** I use base64 image data directly in Realtime Database which has some limitations.
+*   This app does not use Firebase Storage for watch images
+*   Base64 image strings are stored directly in Realtime Database
+*   Large files may exceed Realtime Database limits, keep them small

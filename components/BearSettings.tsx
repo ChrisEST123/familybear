@@ -24,6 +24,7 @@ const BearSettingsScreen: React.FC = () => {
     >();
     const [imageUri, setImageUri] = useState<string | null>(null);
 
+    // Load the currently active sound pattern from Firebase
     useEffect(() => {
         const loadActivePattern = async () => {
             try {
@@ -37,13 +38,12 @@ const BearSettingsScreen: React.FC = () => {
         loadActivePattern();
     }, []);
 
+    // Load the currently stored image used for watch notifications
     useEffect(() => {
         const loadExistingImage = async () => {
             try {
                 const uri = await loadWatchNotificationImage();
-                if (uri) {
-                    setImageUri(uri);
-                }
+                if (uri) setImageUri(uri);
             } catch (err) {
                 console.error('Failed to load image from Firebase:', err);
             }
@@ -52,6 +52,9 @@ const BearSettingsScreen: React.FC = () => {
         loadExistingImage();
     }, []);
 
+    /**
+     * Handles user selection of a new sound pattern.
+     */
     const handleSelect = async (pattern: string) => {
         setSelectedPattern(pattern);
         try {
@@ -63,6 +66,10 @@ const BearSettingsScreen: React.FC = () => {
         }
     };
 
+    /**
+     * Allows the user to pick an image and uploads it to Firebase.
+     * Used for notification previews on a connected watch.
+     */
     const handlePickImage = async () => {
         const result = await ImagePicker.launchImageLibraryAsync({
             mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -94,8 +101,10 @@ const BearSettingsScreen: React.FC = () => {
         }
     };
 
+    // === UI Rendering ===
     return (
         <View style={[globalStyles.root, styles.container]}>
+            {/* --- Watch Image Picker Section --- */}
             <Text style={styles.label}>Image for Watch Notification</Text>
             <View style={styles.imagePickerContainer}>
                 {imageUri ? (
@@ -109,6 +118,7 @@ const BearSettingsScreen: React.FC = () => {
                 <PrimaryButton label="Choose Image" onPress={handlePickImage} />
             </View>
 
+            {/* --- Sound Pattern Picker Section --- */}
             <Text style={styles.label}>Choose a Song</Text>
             <View style={styles.pickerWrapper}>
                 <Picker
@@ -134,6 +144,7 @@ const BearSettingsScreen: React.FC = () => {
 
 export default BearSettingsScreen;
 
+// === Styles ===
 const styles = StyleSheet.create({
     container: {
         padding: spacing.lg,

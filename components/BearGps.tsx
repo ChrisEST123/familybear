@@ -13,19 +13,22 @@ import {
 } from '@/services/firebase/subscribers';
 
 const BearGps: React.FC = () => {
-    const [gpsEnabled, setGpsEnabledState] = useState(false);
+    const [gpsEnabled, setGpsEnabledState] = useState(false); // Live GPS toggle state
     const [gpsData, setGpsData] = useState<{
         latitude: number;
         longitude: number;
-    } | null>(null);
+    } | null>(null); // Last known coordinates from the bear
+
     const [geoFenceStatus, setGeoFenceStatus] = useState<boolean | 'unknown'>(
         'unknown'
-    );
+    ); // In/out/unknown geofence status
 
+    // Subscribe to GPS toggle + GPS data
     useEffect(() => {
         const unsubGps = subscribeToGpsEnabled(setGpsEnabledState);
         let unsubGpsData: () => void;
 
+        // If GPS is enabled, also subscribe to location data
         if (gpsEnabled) {
             unsubGpsData = subscribeToBearGpsData((data) => {
                 setGpsData(data);
@@ -37,6 +40,7 @@ const BearGps: React.FC = () => {
                 }
             });
         } else {
+            // Reset state if GPS is turned off
             setGpsData(null);
             setGeoFenceStatus('unknown');
         }
@@ -47,12 +51,14 @@ const BearGps: React.FC = () => {
         };
     }, [gpsEnabled]);
 
+    // Toggle GPS status in Firebase
     const toggleGps = () => {
         setGpsEnabled(!gpsEnabled).catch(() =>
             Alert.alert('Error', 'Failed to update GPS status')
         );
     };
 
+    // Open the last known location in Google Maps
     const openInMaps = () => {
         if (!gpsData) return;
         const { latitude, longitude } = gpsData;
@@ -60,18 +66,22 @@ const BearGps: React.FC = () => {
         Linking.openURL(url);
     };
 
+    // === UI Rendering ===
     return (
         <View style={globalStyles.root}>
+            {/* Status summary tiles for GPS + Geofence */}
             <View style={styles.statusGrid}>
                 <BearStatusTileWrapper type="gps" value={gpsEnabled} />
                 <BearStatusTileWrapper type="geoFence" value={geoFenceStatus} />
             </View>
 
+            {/* Toggle switch for enabling GPS */}
             <View style={styles.row}>
                 <Text style={styles.label}>GPS Enabled</Text>
                 <Switch value={gpsEnabled} onValueChange={toggleGps} />
             </View>
 
+            {/* GPS feedback and action */}
             <View style={styles.gpsInfo}>
                 {gpsEnabled ? (
                     gpsData ? (
@@ -96,6 +106,7 @@ const BearGps: React.FC = () => {
 
 export default BearGps;
 
+// === Styles ===
 const styles = StyleSheet.create({
     row: {
         flexDirection: 'row',
